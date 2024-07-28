@@ -1,0 +1,393 @@
+{
+  "advanced-circuit": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/advanced-circuit.png",
+    "production_time": 6,
+    "quantity": 1,
+    "recipe": {
+      "copper-cable": 4,
+      "electronic-circuit": 2,
+      "plastic-bar": 2
+    }
+  },
+  "automation-science-pack": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/automation-science-pack.png",
+    "production_time": 5,
+    "quantity": 1,
+    "recipe": {
+      "copper-plate": 1,
+      "iron-gear-wheel": 1
+    }
+  },
+  "battery": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/battery.png",
+    "production_time": 4,
+    "quantity": 1,
+    "recipe": {
+      "copper-plate": 1,
+      "iron-plate": 1,
+      "sulfuric-acid": 20
+    }
+  },
+  "chemical-science-pack": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/chemical-science-pack.png",
+    "production_time": 24,
+    "quantity": 2,
+    "recipe": {
+      "advanced-circuit": 3,
+      "engine-unit": 2,
+      "sulfur": 1
+    }
+  },
+  "coal": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/coal.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "copper-cable": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/copper-cable.png",
+    "production_time": 0.5,
+    "quantity": 2,
+    "recipe": {
+      "copper-plate": 1
+    }
+  },
+  "copper-ore": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/copper-ore.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "copper-plate": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/copper-plate.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "effectivity-module": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/effectivity-module.png",
+    "production_time": 15,
+    "quantity": 1,
+    "recipe": {
+      "advanced-circuit": 5,
+      "electronic-circuit": 5
+    }
+  },
+  "electric-engine-unit": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/electric-engine-unit.png",
+    "production_time": 10,
+    "quantity": 1,
+    "recipe": {
+      "electronic-circuit": 2,
+      "engine-unit": 1,
+      "lubricant": 15
+    }
+  },
+  "electric-furnace": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/electric-furnace.png",
+    "production_time": 5,
+    "quantity": 1,
+    "recipe": {
+      "advanced-circuit": 5,
+      "steel-plate": 10,
+      "stone-brick": 10
+    }
+  },
+  "electronic-circuit": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/electronic-circuit.png",
+    "production_time": 0.5,
+    "quantity": 1,
+    "recipe": {
+      "copper-cable": 3,
+      "iron-plate": 1
+    }
+  },
+  "engine-unit": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/engine-unit.png",
+    "production_time": 10,
+    "quantity": 1,
+    "recipe": {
+      "iron-gear-wheel": 1,
+      "pipe": 2,
+      "steel-plate": 1
+    }
+  },
+  "firearm-magazine": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/firearm-magazine.png",
+    "production_time": 1,
+    "quantity": 1,
+    "recipe": {
+      "iron-plate": 4
+    }
+  },
+  "flying-robot-frame": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/flying-robot-frame.png",
+    "production_time": 20,
+    "quantity": 1,
+    "recipe": {
+      "battery": 2,
+      "electric-engine-unit": 1,
+      "electronic-circuit": 3,
+      "steel-plate": 1
+    }
+  },
+  "grenade": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/grenade.png",
+    "production_time": 8,
+    "quantity": 1,
+    "recipe": {
+      "coal": 10,
+      "iron-plate": 5
+    }
+  },
+  "inserter": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/inserter.png",
+    "production_time": 0.5,
+    "quantity": 1,
+    "recipe": {
+      "electronic-circuit": 1,
+      "iron-gear-wheel": 1,
+      "iron-plate": 1
+    }
+  },
+  "iron-gear-wheel": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/iron-gear-wheel.png",
+    "production_time": 0.5,
+    "quantity": 1,
+    "recipe": {
+      "iron-plate": 2
+    }
+  },
+  "iron-ore": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/iron-ore.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "iron-plate": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/iron-plate.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "iron-stick": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/iron-stick.png",
+    "production_time": 0.5,
+    "quantity": 2,
+    "recipe": {
+      "iron-plate": 1
+    }
+  },
+  "logistic-science-pack": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/logistic-science-pack.png",
+    "production_time": 6,
+    "quantity": 1,
+    "recipe": {
+      "inserter": 1,
+      "transport-belt": 1
+    }
+  },
+  "low-density-structure": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/low-density-structure.png",
+    "production_time": 20,
+    "quantity": 1,
+    "recipe": {
+      "copper-plate": 20,
+      "plastic-bar": 5,
+      "steel-plate": 2
+    }
+  },
+  "lubricant": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/lubricant.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "military-science-pack": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/military-science-pack.png",
+    "production_time": 10,
+    "quantity": 2,
+    "recipe": {
+      "grenade": 1,
+      "piercing-rounds-magazine": 1,
+      "stone-brick": 2
+    }
+  },
+  "piercing-rounds-magazine": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/piercing-rounds-magazine.png",
+    "production_time": 3,
+    "quantity": 1,
+    "recipe": {
+      "copper-plate": 5,
+      "firearm-magazine": 1,
+      "steel-plate": 1
+    }
+  },
+  "pipe": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/pipe.png",
+    "production_time": 0.5,
+    "quantity": 1,
+    "recipe": {
+      "iron-plate": 1
+    }
+  },
+  "plastic-bar": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/plastic-bar.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "processing-unit": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/processing-unit.png",
+    "production_time": 10,
+    "quantity": 1,
+    "recipe": {
+      "advanced-circuit": 2,
+      "electronic-circuit": 20,
+      "sulfuric-acid": 5
+    }
+  },
+  "production-science-pack": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/production-science-pack.png",
+    "production_time": 21,
+    "quantity": 3,
+    "recipe": {
+      "electric-furnace": 1,
+      "productivity-module": 1,
+      "rail": 30
+    }
+  },
+  "productivity-module": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/productivity-module.png",
+    "production_time": 15,
+    "quantity": 1,
+    "recipe": {
+      "advanced-circuit": 5,
+      "electronic-circuit": 5
+    }
+  },
+  "rail": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/rail.png",
+    "production_time": 0.5,
+    "quantity": 2,
+    "recipe": {
+      "iron-stick": 1,
+      "steel-plate": 1,
+      "stone": 1
+    }
+  },
+  "speed-module": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/speed-module.png",
+    "production_time": 15,
+    "quantity": 1,
+    "recipe": {
+      "advanced-circuit": 5,
+      "electronic-circuit": 5
+    }
+  },
+  "steel-plate": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/steel-plate.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "stone": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/stone.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "stone-brick": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/stone-brick.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "sulfur": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/sulfur.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "sulfuric-acid": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/sulfuric-acid.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "transport-belt": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/transport-belt.png",
+    "production_time": 0.5,
+    "quantity": 2,
+    "recipe": {
+      "iron-gear-wheel": 1,
+      "iron-plate": 1
+    }
+  },
+  "uranium-ore": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/uranium-ore.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "utility-science-pack": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/utility-science-pack.png",
+    "production_time": 21,
+    "quantity": 3,
+    "recipe": {
+      "flying-robot-frame": 1,
+      "low-density-structure": 3,
+      "processing-unit": 2
+    }
+  },
+  "wall": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/wall.png",
+    "production_time": 0.5,
+    "quantity": 1,
+    "recipe": {
+      "stone-brick": 5
+    }
+  }
+}
