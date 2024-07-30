@@ -1,11 +1,10 @@
-from typing import Literal, Optional, cast
-from FCV2_Classes import *
+from typing import Literal, Optional
+from classes import *
 from utility import *
-from paths import PATHS
+from data import *
+from consts import *
 from treelib import Node, Tree
 
-MISCELLANEOUS = read(PATHS.MISCELLANEOUS)
-RECIPES = read(PATHS.RECIPES)
 
 def calcEffect(effects: dict[int: Module]) -> Effect:
     resEffect = Effect()
@@ -52,26 +51,26 @@ def setEffects(machine: Machine, effects: dict[Module: int], mode: Literal['FULL
 
     return switch_case(mode)
     
-def buildCraftTree(itemName: str, amount: float, machine: Machine, tree: Tree = Tree()) -> Tree:
+def buildCraftTree(itemName: str, amount: float, machine: Machine, craftTree: Tree = Tree()) -> Tree:
     def buildNode(itemName: str, amount: float, machine: Machine, root: Optional[str] = None):
         item = RECIPES.get(itemName)
 
         if (item == None): return
-        node = Node(itemName, data=ItemMeta(Item(itemName, *item), amount=amount)) #TODO SPEED
-        tree.add_node(node, root)
+        node = Node(itemName, data=ItemMeta(item, amount=amount)) #TODO SPEED
+        craftTree.add_node(node, root)
 
-        if (item['elementary']): return
+        if (item.elementary): return
 
-        for componentName, componentAmount in item['recipe'].items():
+        for componentName, componentAmount in item.recipe.items():
             component = RECIPES.get(componentName)
             prodModifier = machine.productivity
-            quantityModifier = component['quantity'] if component['quantity'] > 0 else 1
+            quantityModifier = component.quantity if component.quantity > 0 else 1
             amountModifier = quantityModifier * (1 + prodModifier)
             buildNode(componentName, componentAmount*amount / amountModifier, machine, node.identifier)
 
     buildNode(itemName, amount, machine)
 
-    return tree
+    return craftTree
 
 def calcRes(craftTree: Tree):
     res: dict[str: float] = {}
@@ -96,30 +95,43 @@ def craftTreeWithAmounts(craftTree: Tree) -> Tree:
 
     return tree
 
-def calcSpeedTree(itemName:str, itemPerSecond: float, machine: Machine, craftTree: Tree = Tree()) -> Tree:
+def buildSpeedTree(itemName:str, itemPerSecond: float, machine: Machine, craftTree: Tree = Tree()) -> Tree:
     def buildSpeedNode(itemName: str, itemPerSecond: float, machine: Machine, root: Optional[str] = None):
         item = RECIPES.get(itemName)
 
         if (item == None): return
-        node = Node(itemName, data=ItemMeta(Item(itemName, *item), amount=0, speed=itemPerSecond, machinesAmount=itemPerSecond/machine.speed)) #TODO SPEED
-        tree.add_node(node, root)
 
-        if (item['elementary']): return
+        machinesAmount = None if item.elementary else (itemPerSecond*item.production_time) / (item.quantity*machine.speed)
+        node = Node(itemName, data=ItemMeta(item,  speed=itemPerSecond, machinesAmount=machinesAmount)) #TODO SPEED
 
-        for componentName, componentAmount in item['recipe'].items():
+        craftTree.add_node(node, root)
+
+        if (item.elementary): return
+
+        for componentName, componentAmount in item.recipe.items():
             component = RECIPES.get(componentName)
             prodModifier = machine.productivity
-            quantityModifier = component['quantity'] if component['quantity'] > 0 else 1
+            quantityModifier = component.quantity if component.quantity > 0 else 1 #TODO fix
             amountModifier = quantityModifier * (1 + prodModifier)
-            buildSpeedNode(componentName, componentAmount*amount / amountModifier, machine, node.identifier)
+
+            buildSpeedNode(componentName, componentAmount*itemPerSecond/amountModifier, machine, node.identifier)
 
     buildSpeedNode(itemName, itemPerSecond, machine)
 
+    return craftTree
+
+def craftTreeWithSpeeds(craftTree: Tree) -> Tree:
+    tree = Tree(craftTree.subtree(craftTree.root), deep=True)
+
+    for nodeName in craftTree.expand_tree():
+        node = tree[nodeName]
+        tag = node.tag + ' x{}(i/s)'.format(node.data.speed)
+        if (not node.data.item.elementary):
+            tag +=  ' {}m'.format(node.data.machinesAmount)
+        node.tag = tag
+
     return tree
 
-
-# update({}, PATHS.MISCELLANEOUS)
-# test(PATHS.MISCELLANEOUS)
 
 effectedMachine = setEffects(None, None, 'FULL')
 print(effectedMachine)
@@ -133,6 +145,10 @@ print(res)
 
 aTree = craftTreeWithAmounts(tree)
 print(aTree)
+sTree = buildSpeedTree('electric-engine-unit', 1, ASSENBLING_MACHINE_3)
+print(sTree)
+saTree = craftTreeWithSpeeds(sTree)
+print(saTree)
 
 # tree = Tree()
 # node1 = Node("Harry", "harry")  # root node
