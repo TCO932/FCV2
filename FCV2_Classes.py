@@ -41,3 +41,19 @@ ASSENBLING_MACHINE_3 = Machine('assembling-machine-3', 4, 1.25, 0)
 class Effect:
     speed: float = 0.0
     productivity: float = 0.0
+
+@dataclass
+class Item:
+    name: str
+    elementary: bool
+    image: str
+    production_time: float
+    quantity: float
+    recipe: dict[str, float]
+
+@dataclass
+class ItemMeta:
+    item: Item
+    amount: float | None = None
+    machinesAmount: float | None = None
+    speed: float | None = None
