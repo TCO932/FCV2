@@ -66,11 +66,11 @@
     "recipe": {}
   },
   "copper-plate": {
-    "elementary": true,
+    "elementary": false,
     "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/copper-plate.png",
-    "production_time": 0,
-    "quantity": 0,
-    "recipe": {}
+    "production_time": 3.2,
+    "quantity": 1,
+    "recipe": {"copper-ore": 1}
   },
   "effectivity-module": {
     "elementary": false,
@@ -184,11 +184,11 @@
     "recipe": {}
   },
   "iron-plate": {
-    "elementary": true,
+    "elementary": false,
     "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/iron-plate.png",
-    "production_time": 0,
-    "quantity": 0,
-    "recipe": {}
+    "production_time": 3.2,
+    "quantity": 1,
+    "recipe": {"iron-ore": 1}
   },
   "iron-stick": {
     "elementary": false,
@@ -259,11 +259,11 @@
     }
   },
   "plastic-bar": {
-    "elementary": true,
+    "elementary": false,
     "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/plastic-bar.png",
-    "production_time": 0,
-    "quantity": 0,
-    "recipe": {}
+    "production_time": 1,
+    "quantity": 2,
+    "recipe": {"coal": 1, "petrolium-gas": 20}
   },
   "processing-unit": {
     "elementary": false,
@@ -352,6 +352,48 @@
     "production_time": 0,
     "quantity": 0,
     "recipe": {}
+  },
+  "petrolium-gas": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/petrolium-gas.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "rocket-part": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/rocket-part.png",
+    "production_time": 3,
+    "quantity": 1,
+    "recipe": {"rocket-control-unit": 10, "low-density-structure": 10, "rocket-fuel": 10}
+  },
+  "rocket-fuel": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/rocket-fuel.png",
+    "production_time": 3,
+    "quantity": 1,
+    "recipe": {"solid-fuel": 10, "light-oil": 10}
+  },
+  "solid-fuel": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/solid-fuel.png",
+    "production_time": 2,
+    "quantity": 1,
+    "recipe": {"solid-fuel": 10, "light-oil": 10}
+  },
+  "light-oil": {
+    "elementary": true,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/light-oil.png",
+    "production_time": 0,
+    "quantity": 0,
+    "recipe": {}
+  },
+  "rocket-control-unit": {
+    "elementary": false,
+    "image": "https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/iemages/rocket-control-unit.png",
+    "production_time": 30,
+    "quantity": 1,
+    "recipe": {"processing-unit": 1, "speed-module": 1}
   },
   "transport-belt": {
     "elementary": false,
