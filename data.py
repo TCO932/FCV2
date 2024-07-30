@@ -237,7 +237,7 @@ RECIPES = {
         image='https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/plastic-bar.png',
         production_time=1,
         quantity=2,
-        recipe={'coal': 1, 'petrolium-gas': 20}
+        recipe={'coal': 1, 'petroleum-gas': 20}
     ),
     'processing-unit': Item(
         name='processing-unit',
@@ -320,10 +320,10 @@ RECIPES = {
         quantity=0,
         recipe={}
     ),
-    'petrolium-gas': Item(
-        name='petrolium-gas',
+    'petroleum-gas': Item(
+        name='petroleum-gas',
         elementary=True,
-        image='https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/petrolium-gas.png',
+        image='https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/petroleum-gas.png',
         production_time=0,
         quantity=0,
         recipe={}
