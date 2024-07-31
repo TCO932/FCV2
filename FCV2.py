@@ -4,7 +4,9 @@ from utility import *
 from data import *
 from consts import *
 from treelib import Node, Tree
+from diskcache import Cache
 
+cache = Cache('cache')
 
 def calcEffect(effects: dict[int: Module]) -> Effect:
     resEffect = Effect()
@@ -13,8 +15,6 @@ def calcEffect(effects: dict[int: Module]) -> Effect:
         resEffect.speed += module.speed * amount
     return resEffect
     
-def placeholder(): pass
-
 def setEffects(machine: Machine, effects: dict[Module: int], mode: Literal['FULL', 'ONLY_PROD', 'CUSTOM'] = 'CUSTOM') -> EffectedMachine:
     """
     FULL (max amount beacons with 2 tier 3 speed modules, max amount tier 3 prod modules); 
@@ -43,14 +43,15 @@ def setEffects(machine: Machine, effects: dict[Module: int], mode: Literal['FULL
 
     switcher = {}
     switcher['FULL'] = FullMode
-    switcher['ONLY_PROD'] = placeholder
+    switcher['ONLY_PROD'] = customMode
     switcher['CUSTOM'] = customMode
 
     def switch_case(case):
         return switcher.get(case, lambda: customMode)()
 
     return switch_case(mode)
-    
+
+@cache.memoize()
 def buildCraftTree(itemName: str, amount: float, machine: Machine, craftTree: Tree = Tree()) -> Tree:
     def buildNode(itemName: str, amount: float, machine: Machine, root: Optional[str] = None):
         item = RECIPES.get(itemName)
@@ -132,23 +133,23 @@ def craftTreeWithSpeeds(craftTree: Tree) -> Tree:
 
     return tree
 
+if __name__ == "__main__":
+    effectedMachine = setEffects(None, None, 'FULL')
+    print(effectedMachine)
 
-effectedMachine = setEffects(None, None, 'FULL')
-print(effectedMachine)
-
-tree = buildCraftTree('rocket-part', 100, ASSENBLING_MACHINE_3)
-# print(tree)
+    tree = buildCraftTree('rocket-part', 100, ASSENBLING_MACHINE_3)
+    # print(tree)
 
 
-res = calcRes(tree)
-print(res)
+    res = calcRes(tree)
+    print(res)
 
-aTree = craftTreeWithAmounts(tree)
-print(aTree)
-sTree = buildSpeedTree('electric-engine-unit', 1, ASSENBLING_MACHINE_3)
-print(sTree)
-saTree = craftTreeWithSpeeds(sTree)
-print(saTree)
+    aTree = craftTreeWithAmounts(tree)
+    print(aTree)
+    sTree = buildSpeedTree('electric-engine-unit', 1, ASSENBLING_MACHINE_3)
+    print(sTree)
+    saTree = craftTreeWithSpeeds(sTree)
+    print(saTree)
 
 # tree = Tree()
 # node1 = Node("Harry", "harry")  # root node
