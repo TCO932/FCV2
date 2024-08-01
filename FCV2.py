@@ -57,7 +57,7 @@ def buildCraftTree(itemName: str, amount: float, machine: Machine, craftTree: Tr
         item = RECIPES.get(itemName)
 
         if (item == None): return
-        node = Node(itemName, data=ItemMeta(item, amount=amount)) #TODO SPEED
+        node = Node(itemName, data=ItemMeta(**item, amount=amount)) #TODO SPEED
         craftTree.add_node(node, root)
 
         if (item.elementary): return
@@ -103,7 +103,7 @@ def buildSpeedTree(itemName:str, itemPerSecond: float, machine: Machine, craftTr
         if (item == None): return
 
         machinesAmount = None if item.elementary else (itemPerSecond*item.production_time) / (item.quantity*machine.speed)
-        node = Node(itemName, data=ItemMeta(item,  speed=itemPerSecond, machinesAmount=machinesAmount)) #TODO SPEED
+        node = Node(itemName, data=ItemMeta(**vars(item),  speed=itemPerSecond, machinesAmount=machinesAmount)) #TODO SPEED
 
         craftTree.add_node(node, root)
 

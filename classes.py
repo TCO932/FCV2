@@ -44,8 +44,11 @@ class Item:
         return self.quantity / self.production_time
 
 @dataclass
-class ItemMeta:
-    item: Item
+class ItemMeta(Item):
     amount: float | None = None
     machinesAmount: float | None = None
     speed: float | None = None
+
+    def __len__(self):
+        # Возвращаем количество атрибутов объекта
+        return len(vars(self))
