@@ -1,2 +1,4 @@
 *.pyc
 cache
+*.ui
+test.py
