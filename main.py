@@ -8,7 +8,8 @@ import treelib as tr
 import FCV2 as fcv2
 from classes import ItemMeta
 from data import *
-from qtUI.ui import Ui_MainWindow
+import qtUI.FCV2_ui as tree
+import qtUI.Tabs_ui as tabs
 
 class Node(QGraphicsPixmapItem):
     def __init__(self, x, y, dataNode: tr.Node, label: str = None, edges=None):
@@ -197,7 +198,7 @@ if __name__ == "__main__":
     tableView = InfoPanel()
 
     graphicsView = GraphView(tableView)
-    ui = Ui_MainWindow(graphicsView, tableView)
+    ui = tabs.Ui_MainWindow(graphicsView, tableView)
     ui.setupUi(window)
 
     graphicsView.build_graph(speedTree)
