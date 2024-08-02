@@ -122,6 +122,31 @@ def buildSpeedTree(itemName:str, itemPerSecond: float, machine: Machine, craftTr
 
     return craftTree
 
+def calcMachinesAmount(item: Item, itemPerSecond: float, machine: Machine) -> float | None:
+    return None if item.elementary else (itemPerSecond*item.production_time) / (item.quantity*machine.speed)
+
+
+def initSpeedTree(item: ItemTree, speed: float, machine: Machine) -> ItemTree:
+    itemTree = ItemTree()
+
+    machinesAmount = calcMachinesAmount(item, speed, machine)
+    itemMeta = ItemMeta(**vars(item), speed=speed, machinesAmount=machinesAmount, machine=ASSENBLING_MACHINE_3.name)
+    itemTree.addRoot(itemMeta)
+
+    return itemTree
+
+
+def buildChildrenSpeed(itemMeta: ItemMeta, machine: Machine, tree: ItemTree, parentId: str) -> ItemTree:
+    for childName, amount in itemMeta.recipe.items():
+        childItem: Item = RECIPES[childName]
+        childItemSpeed = itemMeta.speed * amount
+        machinesAmount = calcMachinesAmount(childItem, childItemSpeed, machine)
+        childItemMeta: ItemMeta = ItemMeta(**vars(childItem),  speed=childItemSpeed, machinesAmount=machinesAmount)
+        tree.addNode(childItemMeta, parentId)
+
+    return tree
+
+
 def craftTreeWithSpeeds(craftTree: Tree) -> Tree:
     tree = Tree(craftTree.subtree(craftTree.root), deep=True)
 

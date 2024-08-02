@@ -13,6 +13,12 @@ SPEED_MODULE_1 = Module('speed-module-1', 0.0, 0.2)
 SPEED_MODULE_2 = Module('speed-module-2', 0.0, 0.3)
 SPEED_MODULE_3 = Module('speed-module-3', 0.0, 0.5)
 
+ASSENBLING_MACHINES = {
+    'assembling-machine-1': ASSENBLING_MACHINE_1, 
+    'assembling-machine-2': ASSENBLING_MACHINE_2, 
+    'assembling-machine-3': ASSENBLING_MACHINE_3, 
+}
+
 RECIPES = {
     'advanced-circuit': Item(
         name='advanced-circuit',

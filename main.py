@@ -1,23 +1,20 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QGraphicsView, QTableView, QGraphicsScene, QGraphicsTextItem, QGraphicsLineItem, QGraphicsPixmapItem, QVBoxLayout, QWidget, QLabel, QHBoxLayout
+from PyQt6.QtWidgets import QApplication, QGraphicsView, QTableView, QGraphicsScene, QGraphicsTextItem, QGraphicsLineItem, QGraphicsPixmapItem, QComboBox, QStyledItemDelegate
 from PyQt6.QtCore import Qt, QPoint, QAbstractTableModel, QModelIndex
 from PyQt6.QtGui import QPainter, QPen, QPixmap
 from PyQt6 import QtWidgets
 import requests
-import treelib as tr
 import FCV2 as fcv2
-from classes import ItemMeta
+from classes import ItemMeta, ItemTree
 from data import *
-import qtUI.FCV2_ui as tree
 import qtUI.Tabs_ui as tabs
 
 class Node(QGraphicsPixmapItem):
-    def __init__(self, x, y, dataNode: tr.Node, label: str = None, edges=None):
+    def __init__(self, x, y, itemMeta: ItemMeta, label: str = None, edges=None):
         super().__init__()
-        self.dataNode: tr.Node = dataNode
-        self.data: ItemMeta = dataNode.data
+        self.itemMeta: ItemMeta = itemMeta
 
-        self.setPixmap(self.load_image(self.data.image))
+        self.setPixmap(self.load_image(self.itemMeta.image))
         self.setPos(x, y)
         self.setFlag(QGraphicsPixmapItem.GraphicsItemFlag.ItemIsSelectable)
 
@@ -79,10 +76,10 @@ class GraphView(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-    def add_node(self, x, y, node: tr.Node, label: str = None):
-        node = Node(x, y, node, label)
+    def add_node(self, x, y, itemMeta: ItemMeta, label: str = None):
+        node = Node(x, y, itemMeta, label)
         self.scene().addItem(node)
-        self.nodes[node.dataNode.identifier] = node
+        self.nodes[node.itemMeta.id] = node
         return node
 
     def add_edge(self, node1, node2):
@@ -91,22 +88,22 @@ class GraphView(QGraphicsView):
         node1.edges.append(edge)
         node2.edges.append(edge)
 
-    def build_graph(self, tree: tr.Tree):
+    def build_graph(self, tree: ItemTree):
         self.scene().clear()
         indent: int = 1
-        def buildLevel(predecessorId: str = tree.root, level: int = 1):
-            node: tr.Node = tree[predecessorId]
+        def buildLevel(parentId: str = tree.root, level: int = 1):
+            node = tree[parentId]
             nonlocal indent
             x = 100 * indent
             y = 100 * level
             self.add_node(x, y, node, indent)
-            children = tree.children(node.identifier)
+            children = tree.children(node)
             indent -= 1
 
-            for i, child in enumerate(children):
+            for i, childId in enumerate(children):
                 indent += i + 1
-                buildLevel(child.identifier, level=level+1)
-                self.add_edge(self.nodes[child.identifier], self.nodes[predecessorId])
+                buildLevel(childId, level=level+1)
+                self.add_edge(self.nodes[childId], self.nodes[parentId])
 
         buildLevel()
 
@@ -148,15 +145,17 @@ class GraphView(QGraphicsView):
     def update_info_panel(self, node):
         self.itemTableView.update_info(node)
 
+        
 class ItemTableView(QTableView):
     def __init__(self):
         super().__init__()
 
     def update_info(self, node: Node):
-        if (node is not None):
-            data: ItemMeta = node.dataNode.data
+        if node is not None:
+            data: ItemMeta = node.itemMeta
             model = ItemMetaModel(data)
             self.setModel(model)
+            self.setItemDelegate(ItemMetaDelegate(self.model()))
         else:
             self.label.setText("Select a node to see details")
 
@@ -165,12 +164,13 @@ class ItemMetaModel(QAbstractTableModel):
         super().__init__()
         self.itemMeta = itemMeta
         self.fields = list(vars(self.itemMeta).keys())
+        self.machine_options = list(ASSENBLING_MACHINES.keys())  # Predefined values for machine
 
     def rowCount(self, parent=None):
-        return len(self.itemMeta)
+        return len(self.fields)
 
     def columnCount(self, parent=None):
-        return 1  # Название поля и его значение
+        return 1  # Field name and its value
 
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if role == Qt.ItemDataRole.DisplayRole:
@@ -179,14 +179,51 @@ class ItemMetaModel(QAbstractTableModel):
                 return getattr(self.itemMeta, field_name)
         return None
 
+    def flags(self, index):
+        if index.isValid():
+            if self.fields[index.row()] == "machine":
+                return Qt.ItemFlag.ItemIsEditable | Qt.ItemFlag.ItemIsEnabled
+            return Qt.ItemFlag.ItemIsEnabled
+        return Qt.ItemFlag.NoItemFlags
+
+    def setData(self, index, value, role=Qt.ItemDataRole.EditRole):
+        if role == Qt.ItemDataRole.EditRole and index.column() == 0:
+            field_name = self.fields[index.row()]
+            if field_name == "machine" and value in self.machine_options:
+                setattr(self.itemMeta, field_name, value)
+                self.dataChanged.emit(index, index)  # Notify that data has changed
+                return True
+        return False
+
     def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
-                if section != 0:
-                    return "value" 
+                return "Value"
             elif orientation == Qt.Orientation.Vertical:
-                return self.fields[section]  # Возвращаем название поля
+                return self.fields[section]  # Return field name
         return None
+
+class ItemMetaDelegate(QStyledItemDelegate):
+    def __init__(self, model, parent=None):
+        super().__init__(parent)
+        self.machine_options = list(ASSENBLING_MACHINES.keys())  # Predefined values for machine
+        self.fields = model.fields
+
+    def createEditor(self, parent, option, index):
+        if index.row() == self.fields.index("machine"):
+            combo = QComboBox(parent)
+            combo.addItems(self.machine_options)
+            return combo
+        return super().createEditor(parent, option, index)
+
+    def setEditorData(self, editor, index):
+        value = index.model().data(index, Qt.ItemDataRole.EditRole)
+        if index.row() == self.fields.index("machine"):
+            editor.setCurrentText(value)
+
+    def setModelData(self, editor, model, index):
+        if index.row() == self.fields.index("machine"):
+            model.setData(index, editor.currentText(), Qt.ItemDataRole.EditRole)
 
 
 class ItemsListTableView(QTableView):
@@ -213,22 +250,13 @@ class ItemMetaListModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.DisplayRole:
             if index.column() == 0:
                 return self.itemsList[index.row()].name  # Возвращаем название предмета
-        elif role == Qt.ItemDataRole.DecorationRole:
-            # Предполагаем, что у вас есть ссылка на изображение для заголовка
-            image_url = self.itemsList[index.row()].image  # Замените на вашу ссылку
-            pixmap = QPixmap()
-            pixmap.loadFromData(requests.get(image_url).content)  # Загрузка изображения по URL
-            return pixmap  # Возвращаем QPixmap для заголовка
+        # elif role == Qt.ItemDataRole.DecorationRole:
+        #     # Предполагаем, что у вас есть ссылка на изображение для заголовка
+        #     image_url = self.itemsList[index.row()].image  # Замените на вашу ссылку
+        #     pixmap = QPixmap()
+        #     pixmap.loadFromData(requests.get(image_url).content)  # Загрузка изображения по URL
+        #     return pixmap  # Возвращаем QPixmap для заголовка
         return None
-
-    # def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
-    #     if role == Qt.ItemDataRole.DisplayRole:
-    #         if orientation == Qt.Orientation.Horizontal:
-    #             return "Item Image"  # Заголовок для столбца
-    #         elif orientation == Qt.Orientation.Vertical:
-    #             return self.items[section].name  # Возвращаем название предмета для вертикального заголовка
-    #     return None
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -240,18 +268,14 @@ if __name__ == "__main__":
     ui = tabs.Ui_MainWindow(graphicsView, itemTableView, itemsListTableView)
     def itemClickHandler(modelIndex: QModelIndex):
         ui.tabWidget.setCurrentIndex(1)
-        itemName = ui.itemsListTableView.model().itemsList[modelIndex.row()].name
-        print(itemName)
-        craftTree = fcv2.buildCraftTree(itemName, 1, ASSENBLING_MACHINE_3)
+        itemMeta = ui.itemsListTableView.model().itemsList[modelIndex.row()]
+        print(itemMeta)
+        speedTree = fcv2.initSpeedTree(itemMeta, 1, ASSENBLING_MACHINE_3)
 
-        graphicsView.build_graph(craftTree)
+        graphicsView.build_graph(speedTree)
 
     
     ui.itemsListTableView.clicked.connect(itemClickHandler)
     ui.setupUi(window)
-
-
-
-
     window.show()
     sys.exit(app.exec())

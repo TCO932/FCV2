@@ -1,5 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
+import uuid
 
 
 @dataclass
@@ -38,17 +39,90 @@ class Item:
     quantity: float
     recipe: dict[str, float]
 
-    # @property
-    # def frequency(self) -> str | None:
-    #     if (self.elementary): return
-    #     return self.quantity / self.production_time
+    def __str__(self):
+        return (f"Item(name={self.name}, elementary={self.elementary}, "
+                f"image={self.image}, production_time={self.production_time}, "
+                f"quantity={self.quantity}, recipe={self.recipe})")
 
 @dataclass
 class ItemMeta(Item):
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
     amount: float | None = None
+    machine: Machine | None = None
     machinesAmount: float | None = None
     speed: float | None = None
 
     def __len__(self):
-        # Возвращаем количество атрибутов объекта
         return len(vars(self))
+
+    def __eq__(self, other):
+        return isinstance(other, ItemMeta) and self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
+
+    def __str__(self):
+        return (f"ItemMeta(id={self.id}, name={self.name}, elementary={self.elementary}, "
+                f"image={self.image}, production_time={self.production_time}, "
+                f"quantity={self.quantity}, recipe={self.recipe}, "
+                f"amount={self.amount}, machine={self.machine}, "
+                f"machinesAmount={self.machinesAmount}, speed={self.speed})")
+
+
+@dataclass
+class ItemTree():
+    nodes: set[ItemMeta] = field(default_factory=set)
+    links: dict[str, list[str]] = field(default_factory=dict)
+    root: str | None = None
+
+    def addRoot(self, node: ItemMeta) -> str:
+        self.nodes.add(node)
+        self.root = node.id
+        return self.root
+
+    def addNode(self, node: ItemMeta, parentId: str):
+        if node in self.nodes:
+            return
+
+        self.nodes.add(node)
+        if parentId in self.links:
+            self.links[parentId].append(node.id)
+
+    def getNode(self, id: str):
+        for node in self.nodes:
+            if node.id == id:
+                return node
+        return None
+
+    def __getitem__(self, node_id: str) -> ItemMeta | None:
+        return self.getNode(node_id)
+
+    def updateNode(self, nodeId: str, node: ItemMeta):
+        pass
+
+    def _deleteDeepLink(self, nodeId: str):
+        children = self.children(nodeId)
+
+        for child in children:
+            self._deleteDeepLink(child)
+
+        del self.links[nodeId]
+
+    def deleteNode(self, node: ItemMeta):
+        parentId = self.parent(node)
+        if parentId:
+            self.links[parentId].remove(node.id)
+
+        self._deleteDeepLink(node.id)
+
+        self.nodes.remove(node)
+
+    def children(self, parentNode: ItemMeta) -> list[str]:
+        return self.links.get(parentNode.id, [])
+
+    def parent(self, node: ItemMeta) -> str | None:
+        for parentId, children in self.links.items():
+            if node.id in children:
+                return parentId
+
+    
