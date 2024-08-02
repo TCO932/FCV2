@@ -52,12 +52,13 @@ def setEffects(machine: Machine, effects: dict[Module: int], mode: Literal['FULL
     return switch_case(mode)
 
 @cache.memoize()
-def buildCraftTree(itemName: str, amount: float, machine: Machine, craftTree: Tree = Tree()) -> Tree:
+def buildCraftTree(itemName: str, amount: float, machine: Machine, craftTree: Tree = None) -> Tree:
+    craftTree = craftTree if craftTree is not None else Tree()
     def buildNode(itemName: str, amount: float, machine: Machine, root: Optional[str] = None):
         item = RECIPES.get(itemName)
 
         if (item == None): return
-        node = Node(itemName, data=ItemMeta(**item, amount=amount)) #TODO SPEED
+        node = Node(itemName, data=ItemMeta(**vars(item), amount=amount)) #TODO SPEED
         craftTree.add_node(node, root)
 
         if (item.elementary): return
@@ -127,7 +128,7 @@ def craftTreeWithSpeeds(craftTree: Tree) -> Tree:
     for nodeName in craftTree.expand_tree():
         node = tree[nodeName]
         tag = node.tag + ' x{}(i/s)'.format(node.data.speed)
-        if (not node.data.item.elementary):
+        if (not node.data.elementary):
             tag +=  ' {}m'.format(node.data.machinesAmount)
         node.tag = tag
 

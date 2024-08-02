@@ -1,6 +1,6 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QGraphicsView, QTableView, QGraphicsScene, QGraphicsTextItem, QGraphicsLineItem, QGraphicsPixmapItem, QVBoxLayout, QWidget, QLabel, QHBoxLayout
-from PyQt6.QtCore import Qt, QPoint, QAbstractTableModel
+from PyQt6.QtCore import Qt, QPoint, QAbstractTableModel, QModelIndex
 from PyQt6.QtGui import QPainter, QPen, QPixmap
 from PyQt6 import QtWidgets
 import requests
@@ -67,12 +67,12 @@ class Edge(QGraphicsLineItem):
         self.setLine(x1, y1, x2, y2)
 
 class GraphView(QGraphicsView):
-    def __init__(self, info_panel):
+    def __init__(self, itemTableView: QTableView):
         super().__init__()
         self.setScene(QGraphicsScene(self))
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.nodes = {}
-        self.info_panel = info_panel  # Сохраняем ссылку на боковую панель
+        self.itemTableView = itemTableView  # Сохраняем ссылку на боковую панель
         self.is_panning = False
         self.last_mouse_position = QPoint()
 
@@ -92,6 +92,7 @@ class GraphView(QGraphicsView):
         node2.edges.append(edge)
 
     def build_graph(self, tree: tr.Tree):
+        self.scene().clear()
         indent: int = 1
         def buildLevel(predecessorId: str = tree.root, level: int = 1):
             node: tr.Node = tree[predecessorId]
@@ -145,9 +146,9 @@ class GraphView(QGraphicsView):
         self.centerOn(scene_pos - delta)
 
     def update_info_panel(self, node):
-        self.info_panel.update_info(node)
+        self.itemTableView.update_info(node)
 
-class InfoPanel(QTableView):
+class ItemTableView(QTableView):
     def __init__(self):
         super().__init__()
 
@@ -187,21 +188,70 @@ class ItemMetaModel(QAbstractTableModel):
                 return self.fields[section]  # Возвращаем название поля
         return None
 
+
+class ItemsListTableView(QTableView):
+    def __init__(self, itemsList):
+        super().__init__()
+        model = ItemMetaListModel(itemsList)
+        self.setModel(model)
+
+    def update_info(self, itemsList: list[ItemMeta]): pass
+
+class ItemMetaListModel(QAbstractTableModel):
+    def __init__(self, items: dict[ItemMeta]):
+        super().__init__()
+        self.itemsList: list[Item] = list(items.values())
+        self.fields = ['name']  # Указываем, что у нас есть только одно поле - название предмета
+
+    def rowCount(self, parent=None):
+        return len(self.itemsList)
+
+    def columnCount(self, parent=None):
+        return 1  # У нас только один столбец для названий предметов
+
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole:
+            if index.column() == 0:
+                return self.itemsList[index.row()].name  # Возвращаем название предмета
+        elif role == Qt.ItemDataRole.DecorationRole:
+            # Предполагаем, что у вас есть ссылка на изображение для заголовка
+            image_url = self.itemsList[index.row()].image  # Замените на вашу ссылку
+            pixmap = QPixmap()
+            pixmap.loadFromData(requests.get(image_url).content)  # Загрузка изображения по URL
+            return pixmap  # Возвращаем QPixmap для заголовка
+        return None
+
+    # def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+    #     if role == Qt.ItemDataRole.DisplayRole:
+    #         if orientation == Qt.Orientation.Horizontal:
+    #             return "Item Image"  # Заголовок для столбца
+    #         elif orientation == Qt.Orientation.Vertical:
+    #             return self.items[section].name  # Возвращаем название предмета для вертикального заголовка
+    #     return None
+
+
 if __name__ == "__main__":
-    # Здесь вы должны инициализировать ваш tree
-    craftTree = fcv2.buildCraftTree('utility-science-pack', 1, ASSENBLING_MACHINE_3)
-    speedTree = fcv2.buildSpeedTree('utility-science-pack', 1, ASSENBLING_MACHINE_3)
-
-
     app = QApplication(sys.argv)
     window = QtWidgets.QMainWindow()
-    tableView = InfoPanel()
+    itemTableView = ItemTableView()
+    itemsListTableView = ItemsListTableView(RECIPES)
 
-    graphicsView = GraphView(tableView)
-    ui = tabs.Ui_MainWindow(graphicsView, tableView)
+    graphicsView = GraphView(itemTableView)
+    ui = tabs.Ui_MainWindow(graphicsView, itemTableView, itemsListTableView)
+    def itemClickHandler(modelIndex: QModelIndex):
+        ui.tabWidget.setCurrentIndex(1)
+        itemName = ui.itemsListTableView.model().itemsList[modelIndex.row()].name
+        print(itemName)
+        craftTree = fcv2.buildCraftTree(itemName, 1, ASSENBLING_MACHINE_3)
+
+        graphicsView.build_graph(craftTree)
+
+    
+    ui.itemsListTableView.clicked.connect(itemClickHandler)
     ui.setupUi(window)
 
-    graphicsView.build_graph(speedTree)
+
+
 
     window.show()
     sys.exit(app.exec())

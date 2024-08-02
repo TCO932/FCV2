@@ -38,10 +38,10 @@ class Item:
     quantity: float
     recipe: dict[str, float]
 
-    @property
-    def frequency(self) -> str | None:
-        if (self.elementary): return
-        return self.quantity / self.production_time
+    # @property
+    # def frequency(self) -> str | None:
+    #     if (self.elementary): return
+    #     return self.quantity / self.production_time
 
 @dataclass
 class ItemMeta(Item):

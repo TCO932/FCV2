@@ -10,18 +10,12 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 
 class Ui_MainWindow(object):
-    def __init__(self, graphicsView: QtWidgets.QGraphicsView, itemTableView: QtWidgets.QTableView, itemsListTableView: QtWidgets.QTableView):
-        self.graphicsView = graphicsView 
-        self.itemTableView = itemTableView 
-        self.itemsListTableView = itemsListTableView 
-
-    def setupUi(self, MainWindow: QtWidgets.QMainWindow):
+    def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
         MainWindow.setMinimumSize(QtCore.QSize(800, 600))
         MainWindow.setDocumentMode(False)
         MainWindow.setUnifiedTitleAndToolBarOnMac(False)
-
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
@@ -33,85 +27,73 @@ class Ui_MainWindow(object):
         self.centralwidget.setAutoFillBackground(True)
         self.centralwidget.setStyleSheet("")
         self.centralwidget.setObjectName("centralwidget")
-
-        self.tabsColumns = QtWidgets.QHBoxLayout(self.centralwidget)
-        self.tabsColumns.setObjectName("tabsColumns")
-
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.centralwidget)
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
         self.tabWidget = QtWidgets.QTabWidget(parent=self.centralwidget)
         self.tabWidget.setObjectName("tabWidget")
-
         self.searchTab = QtWidgets.QWidget()
         self.searchTab.setObjectName("searchTab")
-
-        self.searchTabRows = QtWidgets.QVBoxLayout(self.searchTab)
-        self.searchTabRows.setObjectName("searchTabRows")
-
-        self.searchColumns = QtWidgets.QHBoxLayout()
-        self.searchColumns.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMinimumSize)
-        self.searchColumns.setObjectName("searchColumns")
-
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.searchTab)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMinimumSize)
+        self.horizontalLayout.setObjectName("horizontalLayout")
         self.searchLine = QtWidgets.QLineEdit(parent=self.searchTab)
         self.searchLine.setObjectName("searchLine")
-
-        self.searchColumns.addWidget(self.searchLine)
-
+        self.horizontalLayout.addWidget(self.searchLine)
         self.searchButton = QtWidgets.QPushButton(parent=self.searchTab)
         self.searchButton.setObjectName("searchButton")
-
-        self.searchColumns.addWidget(self.searchButton)
-        self.searchTabRows.addLayout(self.searchColumns)
-
-        # self.itemsListTableView.setParent(self.searchTabRows)
-        self.itemsListTableView.setObjectName("itemsListTableView")
-        self.itemsListTableView.horizontalHeader().setStretchLastSection(True)
-        self.itemsListTableView.horizontalHeader().hide()
-        self.searchTabRows.addWidget(self.itemsListTableView)
-
+        self.horizontalLayout.addWidget(self.searchButton)
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.itemMetaListModel = QtWidgets.QTableView(parent=self.searchTab)
+        self.itemMetaListModel.setObjectName("itemMetaListModel")
+        self.verticalLayout_2.addWidget(self.itemMetaListModel)
         self.tabWidget.addTab(self.searchTab, "")
-        
         self.craftTab = QtWidgets.QWidget()
         self.craftTab.setObjectName("craftTab")
-        
-        self.craftTabColumns = QtWidgets.QHBoxLayout(self.craftTab)
-        self.craftTabColumns.setObjectName("craftTabColumns")
-        
+        self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.craftTab)
+        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         self.splitter = QtWidgets.QSplitter(parent=self.craftTab)
         self.splitter.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.splitter.setObjectName("splitter")
-
-        self.graphicsView.setParent(self.splitter)
+        self.graphicsView = QtWidgets.QGraphicsView(parent=self.splitter)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(4)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.graphicsView.sizePolicy().hasHeightForWidth())
         self.graphicsView.setSizePolicy(sizePolicy)
         self.graphicsView.setObjectName("graphicsView")
-        
-        self.itemTableView.setParent(self.splitter)
+        self.tableView = QtWidgets.QTableView(parent=self.splitter)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.itemTableView.sizePolicy().hasHeightForWidth())
-        self.itemTableView.setSizePolicy(sizePolicy)
-        self.itemTableView.setObjectName("itemTableView")
-        self.itemTableView.horizontalHeader().setStretchLastSection(True)
-
-        
-        self.craftTabColumns.addWidget(self.splitter)
+        sizePolicy.setHeightForWidth(self.tableView.sizePolicy().hasHeightForWidth())
+        self.tableView.setSizePolicy(sizePolicy)
+        self.tableView.setObjectName("tableView")
+        self.horizontalLayout_4.addWidget(self.splitter)
         self.tabWidget.addTab(self.craftTab, "")
-        self.tabsColumns.addWidget(self.tabWidget)
+        self.horizontalLayout_3.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
-
         self.searchButton.clicked.connect(self.tabWidget.setFocus) # type: ignore
         self.searchLine.textEdited['QString'].connect(self.tabWidget.show) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, MainWindow: QtWidgets.QMainWindow):
+    def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.searchButton.setText(_translate("MainWindow", "PushButton"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.searchTab), _translate("MainWindow", "searchTab"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.craftTab), _translate("MainWindow", "craftTab"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.searchTab), _translate("MainWindow", "Tab 1"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.craftTab), _translate("MainWindow", "Tab 2"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec())
