@@ -10,13 +10,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 
 class Ui_MainWindow(object):
-    def __init__(self, itemsListTableView: QtWidgets.QTableView, graphicsView: QtWidgets.QGraphicsView, itemTableView: QtWidgets.QTableView, machineTableView: QtWidgets.QTableView):
-        self.itemsListTableView = itemsListTableView 
-        self.graphicsView = graphicsView 
-        self.itemTableView = itemTableView 
-        self.machineTableView = machineTableView 
-
-    def setupUi(self, MainWindow: QtWidgets.QMainWindow):
+    def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
         MainWindow.setMinimumSize(QtCore.QSize(800, 600))
@@ -37,24 +31,24 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.setObjectName("verticalLayout_6")
         self.tabWidget = QtWidgets.QTabWidget(parent=self.centralwidget)
         self.tabWidget.setObjectName("tabWidget")
-        self.searchTab = QtWidgets.QWidget()
-        self.searchTab.setObjectName("searchTabRows")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.searchTab)
+        self.searchTabRows = QtWidgets.QWidget()
+        self.searchTabRows.setObjectName("searchTabRows")
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.searchTabRows)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.searchTabColumns = QtWidgets.QHBoxLayout()
         self.searchTabColumns.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMinimumSize)
         self.searchTabColumns.setObjectName("searchTabColumns")
-        self.searchLine = QtWidgets.QLineEdit(parent=self.searchTab)
+        self.searchLine = QtWidgets.QLineEdit(parent=self.searchTabRows)
         self.searchLine.setObjectName("searchLine")
         self.searchTabColumns.addWidget(self.searchLine)
-        self.searchButton = QtWidgets.QPushButton(parent=self.searchTab)
+        self.searchButton = QtWidgets.QPushButton(parent=self.searchTabRows)
         self.searchButton.setObjectName("searchButton")
         self.searchTabColumns.addWidget(self.searchButton)
         self.verticalLayout_2.addLayout(self.searchTabColumns)
-        self.itemsListTableView.setParent(self.searchTab)
-        self.itemsListTableView.setObjectName("itemMetaListModel")
-        self.verticalLayout_2.addWidget(self.itemsListTableView)
-        self.tabWidget.addTab(self.searchTab, "")
+        self.itemMetaListModel = QtWidgets.QTableView(parent=self.searchTabRows)
+        self.itemMetaListModel.setObjectName("itemMetaListModel")
+        self.verticalLayout_2.addWidget(self.itemMetaListModel)
+        self.tabWidget.addTab(self.searchTabRows, "")
         self.craftTab = QtWidgets.QWidget()
         self.craftTab.setObjectName("craftTab")
         self.verticalLayout_9 = QtWidgets.QVBoxLayout(self.craftTab)
@@ -62,12 +56,11 @@ class Ui_MainWindow(object):
         self.craftTabHSplitter = QtWidgets.QSplitter(parent=self.craftTab)
         self.craftTabHSplitter.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.craftTabHSplitter.setObjectName("craftTabHSplitter")
-        self.craftTabHSplitter.setStretchFactor(0, 2)
-        self.craftTabHSplitter.setStretchFactor(1, 1)
-        self.graphicsView.setParent(self.craftTabHSplitter)
+        self.graphicsView = QtWidgets.QGraphicsView(parent=self.craftTabHSplitter)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(2)
         sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.graphicsView.sizePolicy().hasHeightForWidth())
         self.graphicsView.setSizePolicy(sizePolicy)
         self.graphicsView.setObjectName("graphicsView")
         self.craftTabVSplitter = QtWidgets.QSplitter(parent=self.craftTabHSplitter)
@@ -82,7 +75,7 @@ class Ui_MainWindow(object):
         self.itemTableViewGroup.setObjectName("itemTableViewGroup")
         self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.itemTableViewGroup)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
-        self.itemTableView.setParent(self.itemTableViewGroup)
+        self.itemTableView = QtWidgets.QTableView(parent=self.itemTableViewGroup)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(0)
@@ -94,7 +87,7 @@ class Ui_MainWindow(object):
         self.machineTableViewGroup.setObjectName("machineTableViewGroup")
         self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.machineTableViewGroup)
         self.verticalLayout_8.setObjectName("verticalLayout_8")
-        self.machineTableView.setParent(self.machineTableViewGroup)
+        self.machineTableView = QtWidgets.QTableView(parent=self.machineTableViewGroup)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(0)
@@ -110,11 +103,21 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
 
-    def retranslateUi(self, MainWindow: QtWidgets.QMainWindow):
+    def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.searchButton.setText(_translate("MainWindow", "PushButton"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.searchTab), _translate("MainWindow", "searchTab"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.craftTab), _translate("MainWindow", "craftTab"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.searchTabRows), _translate("MainWindow", "Tab 1"))
         self.itemTableViewGroup.setTitle(_translate("MainWindow", "Item"))
         self.machineTableViewGroup.setTitle(_translate("MainWindow", "Machine"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.craftTab), _translate("MainWindow", "Tab 2"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec())
