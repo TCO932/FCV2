@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QComboBox, QStyledItemDelegate, QTableView
 
 from classes import ItemMeta
 from data import ASSENBLING_MACHINES
-from views.Graph import Node
+from widgets.Graph import Node
 
 
 class ItemTableView(QTableView):
@@ -25,7 +25,7 @@ class ItemMetaModel(QAbstractTableModel):
         super().__init__()
         self.itemMeta = itemMeta
         self.fields = list(vars(self.itemMeta).keys())
-        self.machine_options = list(ASSENBLING_MACHINES.keys())  # Predefined values for machine
+        self.machine_options = list(ASSENBLING_MACHINES.keys())
 
     def rowCount(self, parent=None):
         return len(self.fields)

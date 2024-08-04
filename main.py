@@ -5,22 +5,22 @@ from PyQt6.QtCore import QModelIndex
 from PyQt6.QtWidgets import QApplication
 
 import FCV2 as fcv2
-import qtUI.Tabs_ui as tabs
 from data import *
-from views.Graph import GraphView
-from views.ItemsListTable import ItemsListTableView
-from views.ItemTable import ItemTableView
-from views.MachineTable import MachineTableView
+from qtUI.Tabs_ui import Ui_MainWindow
+from widgets.Graph import GraphView
+from widgets.ItemsListTable import ItemsListTableView
+from widgets.ItemTable import ItemTableView
+from widgets.MachineWidget import MachineWidget
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = QtWidgets.QMainWindow()
-    machineTableView = MachineTableView()
-    itemTableView = ItemTableView(machineTableView)
+    machineWidget = MachineWidget()
+    itemTableView = ItemTableView(machineWidget)
     itemsListTableView = ItemsListTableView(RECIPES)
 
     graphicsView = GraphView(itemTableView)
-    ui = tabs.Ui_MainWindow(itemsListTableView, graphicsView, itemTableView, machineTableView)
+    ui = Ui_MainWindow(itemsListTableView, graphicsView, itemTableView, machineWidget)
     def itemClickHandler(modelIndex: QModelIndex):
         ui.tabWidget.setCurrentIndex(1)
         itemMeta = ui.itemsListTableView.model().itemsList[modelIndex.row()]

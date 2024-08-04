@@ -1,6 +1,7 @@
-from dataclasses import dataclass, field
-from typing import Literal
 import uuid
+from dataclasses import dataclass, field
+from enum import Enum, auto
+from typing import Literal
 
 
 @dataclass
@@ -9,12 +10,24 @@ class Module:
     productivity: float
     speed: float
 
+MACHINE_TYPES = ['assembling-machine', 'furnace', 'oil-refinery', 'chemical-plant', 'centrifuge', 'lab', 'rocket-silo']
+
+class MachineType(Enum):
+    ASSEMBLING_MACHINE = auto()
+    FURNACE = auto()
+    OIL_REFINERY = auto()
+    CHEMICAL_PLANT = auto()
+    CENTRIFUGE = auto()
+    LAB = auto()
+    ROCKET_SILO = auto()
+
 @dataclass
-class Machine:
+class Machine():
     name: str
     slots: int
     speed: float
-    productivity: float  #TODO??????????????
+    productivity: float
+    type: Literal['assembling-machine', 'furnace', 'oil-refinery', 'chemical-plant', 'centrifuge', 'lab', 'rocket-silo'] =  'assembling-machine'
 
 @dataclass
 class EffectedMachine(Machine):
@@ -117,12 +130,13 @@ class ItemTree():
 
         self.nodes.remove(node)
 
-    def children(self, parentNode: ItemMeta) -> list[str]:
-        return self.links.get(parentNode.id, [])
+    def children(self, parentNodeId: str) -> list[str]:
+        return self.links.get(parentNodeId, [])
 
     def parent(self, node: ItemMeta) -> str | None:
         for parentId, children in self.links.items():
             if node.id in children:
                 return parentId
+        return None
 
     

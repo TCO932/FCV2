@@ -1,10 +1,11 @@
 from typing import Literal, Optional
-from classes import *
-from utility import *
-from data import *
-from consts import *
-from treelib import Node, Tree
+
 from diskcache import Cache
+from treelib import Node, Tree
+
+from classes import *
+from consts import *
+from data import *
 
 cache = Cache('cache')
 
