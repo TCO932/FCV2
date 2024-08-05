@@ -1,4 +1,3 @@
-
 from PyQt6.QtCore import QAbstractTableModel, Qt
 from PyQt6.QtWidgets import QComboBox, QStyledItemDelegate, QTableView
 
@@ -8,17 +7,26 @@ from widgets.Graph import Node
 
 
 class ItemTableView(QTableView):
-    def __init__(self, machineTableView: QTableView):
+    def __init__(self):
         super().__init__()
         self.horizontalHeader().setStretchLastSection(True)
         self.horizontalHeader().hide()
 
-    def update_info(self, node: Node):
-        if node is not None:
-            data: ItemMeta = node.itemMeta
-            model = ItemMetaModel(data)
-            self.setModel(model)
-            self.setItemDelegate(ItemMetaDelegate(self.model()))
+    def setItem(self, itemMeta: ItemMeta):
+        self.itemMeta = itemMeta
+        model = ItemMetaModel(itemMeta)
+        self.setModel(model)
+        self.setItemDelegate(ItemMetaDelegate(self.model()))
+
+    # def getItem(self) -> ItemMeta:
+    #     itemMeta = ItemMeta()
+
+    #     for row in range(self.model().rowCount()):
+    #         field_name = self.model().fields[row]
+    #         value = self.model().data(self.model().index(row, 0), Qt.ItemDataRole.EditRole)
+    #         setattr(itemMeta, field_name, value)
+
+    #     return itemMeta
 
 class ItemMetaModel(QAbstractTableModel):
     def __init__(self, itemMeta: ItemMeta):

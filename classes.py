@@ -1,14 +1,25 @@
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Literal
+from typing import Literal, Protocol
 
+
+class FormattedNameProtocol(Protocol):
+    name: str
+    def getFormattedName(self):
+        return self.name.replace('-', ' ').title()
 
 @dataclass
-class Module:
+class Module(FormattedNameProtocol):
     name: Literal['productivity-module-1', 'productivity-module-2', 'productivity-module-3', 'speed-module-1', 'speed-module-2', 'speed-module-3']
     productivity: float
     speed: float
+
+class ModulesDict(dict[
+    Literal['productivity-module-1', 'productivity-module-2', 'productivity-module-3', 'speed-module-1', 'speed-module-2', 'speed-module-3'],
+    int
+]):
+    pass
 
 MACHINE_TYPES = ['assembling-machine', 'furnace', 'oil-refinery', 'chemical-plant', 'centrifuge', 'lab', 'rocket-silo']
 
@@ -22,21 +33,29 @@ class MachineType(Enum):
     ROCKET_SILO = auto()
 
 @dataclass
-class Machine():
+class Machine(FormattedNameProtocol):
     name: str
     slots: int
     speed: float
     productivity: float
+    maxBeacons: int
     type: Literal['assembling-machine', 'furnace', 'oil-refinery', 'chemical-plant', 'centrifuge', 'lab', 'rocket-silo'] =  'assembling-machine'
+
+    def __str__(self):
+        return (f"Machine(name={self.name}, "
+                f"slots={self.slots}, "
+                f"speed={self.speed}, "
+                f"productivity={self.productivity}, "
+                f"maxBeacons={self.maxBeacons}, "
+                f"type={self.type})")
 
 @dataclass
 class EffectedMachine(Machine):
     speedInGame: float = 0
-    def __init__(self, machine: Machine):
-        self.name = machine.name
-        self.slots = machine.slots
-        self.speed = machine.speed
-        self.productivity = machine.productivity
+
+    @classmethod
+    def fromMachine(cls, machine: Machine):
+        return cls(**vars(machine))
 
 @dataclass
 class Effect:
@@ -51,11 +70,12 @@ class Item:
     production_time: float
     quantity: float
     recipe: dict[str, float]
+    no_prod: bool = False
 
     def __str__(self):
         return (f"Item(name={self.name}, elementary={self.elementary}, "
                 f"image={self.image}, production_time={self.production_time}, "
-                f"quantity={self.quantity}, recipe={self.recipe})")
+                f"quantity={self.quantity}, recipe={self.recipe}, no_prod={self.no_prod})")
 
 @dataclass
 class ItemMeta(Item):
@@ -64,6 +84,13 @@ class ItemMeta(Item):
     machine: Machine | None = None
     machinesAmount: float | None = None
     speed: float | None = None
+
+    @classmethod
+    def fromItem(cls, item: Item, **kargs):
+        # Объединяем атрибуты item и kargs в один словарь
+        item_data = vars(item)
+        item_data.update(kargs)  # Обновляем словарь item_data с kargs
+        return cls(**item_data)
 
     def __len__(self):
         return len(vars(self))
@@ -84,12 +111,12 @@ class ItemMeta(Item):
 
 @dataclass
 class ItemTree():
-    nodes: set[ItemMeta] = field(default_factory=set)
+    nodes: dict[str, ItemMeta] = field(default_factory=dict)
     links: dict[str, list[str]] = field(default_factory=dict)
     root: str | None = None
 
     def addRoot(self, node: ItemMeta) -> str:
-        self.nodes.add(node)
+        self.nodes[node.id] = node
         self.root = node.id
         return self.root
 
@@ -97,13 +124,16 @@ class ItemTree():
         if node in self.nodes:
             return
 
-        self.nodes.add(node)
-        if parentId in self.links:
-            self.links[parentId].append(node.id)
+        self.nodes[node.id] = node
+        if parentId in self.nodes:
+            if parentId in self.links:
+                self.links[parentId].append(node.id)
+            else:
+                self.links[parentId] = [node.id]
 
-    def getNode(self, id: str):
-        for node in self.nodes:
-            if node.id == id:
+    def getNode(self, nodeId: str):
+        for id, node in self.nodes.items():
+            if nodeId == id:
                 return node
         return None
 
@@ -138,5 +168,3 @@ class ItemTree():
             if node.id in children:
                 return parentId
         return None
-
-    

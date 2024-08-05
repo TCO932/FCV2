@@ -17,16 +17,16 @@ MODULES = {
     'speed-module-3': SPEED_MODULE_3,
 }
 
-ASSENBLING_MACHINE_1 = Machine('assembling-machine-1', 0, 0.5, 0)
-ASSENBLING_MACHINE_2 = Machine('assembling-machine-2', 2, 0.75, 0)
-ASSENBLING_MACHINE_3 = Machine('assembling-machine-3', 4, 1.25, 0)
-ELECTRIC_FURNACE = Machine('electric-furnace', 2, 2, 0, 'furnace')
-OIL_REFINERY = Machine('oil-refinery', 3, 1, 0, 'oil-refinery')
-CHEMICAL_PLANT = Machine('chemical-plant', 3, 1, 0, 'chemical-plant')
-CENTRIFUGE = Machine('centrifuge', 2, 2, 0, 'centrifuge')
-LAB = Machine('lab', 2, 1, 0, 'lab')
-LAB_MAX_SPEED = Machine('lab', 2, 1.5, 0, 'lab')
-ROCKET_SILO = Machine('rocket-silo', 4, 1, 0, 'rocket-silo')
+ASSENBLING_MACHINE_1 = Machine('assembling-machine-1', 0, 0.5, 0, 12,)
+ASSENBLING_MACHINE_2 = Machine('assembling-machine-2', 2, 0.75, 0, 12,)
+ASSENBLING_MACHINE_3 = Machine('assembling-machine-3', 4, 1.25, 0, 12,)
+ELECTRIC_FURNACE = Machine('electric-furnace', 2, 2, 0, 12, 'furnace')
+OIL_REFINERY = Machine('oil-refinery', 3, 1, 0, 16, 'oil-refinery')
+CHEMICAL_PLANT = Machine('chemical-plant', 3, 1, 0, 12, 'chemical-plant')
+CENTRIFUGE = Machine('centrifuge', 2, 2, 0, 12, 'centrifuge')
+LAB = Machine('lab', 2, 1, 0, 12, 'lab')
+LAB_MAX_SPEED = Machine('lab', 2, 1.5, 0, 12, 'lab')
+ROCKET_SILO = Machine('rocket-silo', 4, 1, 0, 20, 'rocket-silo')
 
 MACHINES = {
     'assembling-machine-1': ASSENBLING_MACHINE_1,

@@ -9,48 +9,26 @@ from data import *
 
 cache = Cache('cache')
 
-def calcEffect(effects: dict[int: Module]) -> Effect:
-    resEffect = Effect()
-    for amount, module in effects.items():
+def calcEffect(effects: dict[int: Module], beaconsAmount: int) -> Effect:
+    resEffect = Effect(
+        speed=beaconsAmount*SPEED_MODULE_3.speed/2
+    )
+    for moduleName, amount in effects.items():
+        module = MODULES[moduleName]
         resEffect.productivity += module.productivity * amount
         resEffect.speed += module.speed * amount
     return resEffect
     
-def setEffects(machine: Machine, effects: dict[Module: int], mode: Literal['FULL', 'ONLY_PROD', 'CUSTOM'] = 'CUSTOM') -> EffectedMachine:
-    """
-    FULL (max amount beacons with 2 tier 3 speed modules, max amount tier 3 prod modules); 
+def setEffects(machine: Machine, effects: dict[str: int], beaconsAmount: int) -> EffectedMachine:
+    effectedMachine = EffectedMachine.fromMachine(machine)
+    
+    effect = calcEffect(effects, beaconsAmount)
 
-    ONLY_PROD (max amount tier 3 prod modules);
+    effectedMachine.productivity = effect.productivity
+    effectedMachine.speed = machine.speed * (1 + effect.speed) * (1 + effect.productivity)
+    effectedMachine.speedInGame = machine.speed * (1 + effect.speed)
 
-    CUSTOM (default value, custom beacons and speed modules amount, custom speed module tiers)
-    """
-
-    def FullMode():
-        machine = ASSENBLING_MACHINE_3
-        effects: dict[int: Module] = {
-            machine.slots: PRODUCTIVITY_MODULE_3, 12: SPEED_MODULE_3 #TODO: fix 12 in future
-        }
-        effectedMachine = EffectedMachine(machine)
-        effect = calcEffect(effects)
-        effectedMachine.productivity = effect.productivity
-        effectedMachine.speedInGame = machine.speed * (1 + effect.speed)
-        effectedMachine.speed = machine.speed * (1 + effect.speed) * (1 + effect.productivity) #TODO: check this in game
-
-        return effectedMachine
-
-    def customMode():
-
-        return 
-
-    switcher = {}
-    switcher['FULL'] = FullMode
-    switcher['ONLY_PROD'] = customMode
-    switcher['CUSTOM'] = customMode
-
-    def switch_case(case):
-        return switcher.get(case, lambda: customMode)()
-
-    return switch_case(mode)
+    return effectedMachine
 
 @cache.memoize()
 def buildCraftTree(itemName: str, amount: float, machine: Machine, craftTree: Tree = None) -> Tree:
@@ -123,27 +101,26 @@ def buildSpeedTree(itemName:str, itemPerSecond: float, machine: Machine, craftTr
 
     return craftTree
 
-def calcMachinesAmount(item: Item, itemPerSecond: float, machine: Machine) -> float | None:
-    return None if item.elementary else (itemPerSecond*item.production_time) / (item.quantity*machine.speed)
+def calcMachinesAmount(itemMeta: ItemMeta) -> float | None:
+    return None if itemMeta.elementary else (itemMeta.speed*itemMeta.production_time) / (itemMeta.quantity*itemMeta.machine.speed)
 
 
-def initSpeedTree(item: ItemTree, speed: float, machine: Machine) -> ItemTree:
-    itemTree = ItemTree()
+def initSpeedTree(itemMeta: ItemMeta, itemTree: ItemTree | None = None) -> ItemTree:
+    itemTree = itemTree if itemTree else ItemTree()
 
-    machinesAmount = calcMachinesAmount(item, speed, machine)
-    itemMeta = ItemMeta(**vars(item), speed=speed, machinesAmount=machinesAmount, machine=ASSENBLING_MACHINE_3.name)
+    itemMeta.machinesAmount = calcMachinesAmount(itemMeta)
     itemTree.addRoot(itemMeta)
 
     return itemTree
 
 
-def buildChildrenSpeed(itemMeta: ItemMeta, machine: Machine, tree: ItemTree, parentId: str) -> ItemTree:
+def buildChildrenSpeed(itemMeta: ItemMeta, machine: Machine, tree: ItemTree) -> ItemTree:
     for childName, amount in itemMeta.recipe.items():
         childItem: Item = RECIPES[childName]
         childItemSpeed = itemMeta.speed * amount
-        machinesAmount = calcMachinesAmount(childItem, childItemSpeed, machine)
-        childItemMeta: ItemMeta = ItemMeta(**vars(childItem),  speed=childItemSpeed, machinesAmount=machinesAmount)
-        tree.addNode(childItemMeta, parentId)
+        childItemMeta = ItemMeta.fromItem(childItem, machine=ASSENBLING_MACHINE_3, speed=childItemSpeed)
+        childItemMeta.machinesAmount = calcMachinesAmount(childItem)
+        tree.addNode(childItemMeta, itemMeta.id)
 
     return tree
 

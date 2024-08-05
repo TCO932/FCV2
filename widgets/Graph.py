@@ -1,5 +1,5 @@
 import requests
-from PyQt6.QtCore import QPoint, Qt
+from PyQt6.QtCore import QPoint, Qt, QObject, pyqtSignal
 from PyQt6.QtGui import QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import (QGraphicsLineItem, QGraphicsPixmapItem,
                              QGraphicsScene, QGraphicsTextItem, QGraphicsView,
@@ -25,6 +25,9 @@ class Node(QGraphicsPixmapItem):
 
         self.edges = edges if edges is not None else []
 
+    def __eq__(self, other):
+        return isinstance(other, ItemMeta) and self.itemMeta.id == other.itemMeta.id
+
     def load_image(self, image_url):
         try:
             response = requests.get(image_url)
@@ -43,7 +46,7 @@ class Node(QGraphicsPixmapItem):
                 edge.update_position()
         if change == QGraphicsPixmapItem.GraphicsItemChange.ItemSelectedChange:
             if value:
-                self.scene().views()[0].update_info_panel(self)
+                self.scene().views()[0].nodeSelected.emit(self)
         return super().itemChange(change, value)
 
 class Edge(QGraphicsLineItem):
@@ -63,17 +66,24 @@ class Edge(QGraphicsLineItem):
         self.setLine(x1, y1, x2, y2)
 
 class GraphView(QGraphicsView):
+    nodeSelected = pyqtSignal(Node)
+
     def __init__(self, itemTableView: QTableView):
         super().__init__()
         self.setScene(QGraphicsScene(self))
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
-        self.nodes = {}
+        self.nodes: dict[str: Node] = {}
         self.itemTableView = itemTableView
         self.is_panning = False
         self.last_mouse_position = QPoint()
 
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+    def selectNode(self, itemMeta: ItemMeta):
+        node: Node | None = self.nodes.get(itemMeta.id)
+        if node:
+            node.setSelected(True)
 
     def add_node(self, x, y, itemMeta: ItemMeta, label: str = None):
         node = Node(x, y, itemMeta, label)
@@ -88,6 +98,7 @@ class GraphView(QGraphicsView):
         node2.edges.append(edge)
 
     def build_graph(self, tree: ItemTree):
+        self.nodes.clear()
         self.scene().clear()
         indent: int = 1
         def buildLevel(parentId: str = tree.root, level: int = 1):
@@ -96,7 +107,7 @@ class GraphView(QGraphicsView):
             x = 100 * indent
             y = 100 * level
             self.add_node(x, y, node)
-            children = tree.children(node)
+            children = tree.children(node.id)
             indent -= 1
 
             for i, childId in enumerate(children):
@@ -140,6 +151,3 @@ class GraphView(QGraphicsView):
         self.scale(zoom_factor, zoom_factor)
         delta = self.mapToScene(view_pos) - self.mapToScene(self.viewport().rect().center())
         self.centerOn(scene_pos - delta)
-
-    def update_info_panel(self, node):
-        self.itemTableView.update_info(node)
