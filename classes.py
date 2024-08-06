@@ -98,6 +98,7 @@ class Item:
     production_time: float
     quantity: float
     recipe: dict[str, float]
+    machineType: Literal['assembling-machine', 'furnace', 'oil-refinery', 'chemical-plant', 'centrifuge', 'lab', 'rocket-silo', 'mining-drill'] | None
     no_prod: bool = False
 
     def __str__(self):
@@ -107,7 +108,7 @@ class Item:
 
 @dataclass
 class ItemMeta(Item):
-    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    id: str =''
     amount: float | None = None
     effectedMachine: EffectedMachine | None = None
     speed: float | None = None
@@ -117,7 +118,18 @@ class ItemMeta(Item):
         if self.elementary or (not self.effectedMachine):
             return None 
         else:
-            (self.speed*self.production_time) / (self.quantity*self.effectedMachine.speed)
+            return (self.speed*self.production_time) / (self.quantity*self.effectedMachine.speed)
+
+    def __init__(self, **kargs):
+        # Извлекаем аргументы, относящиеся к Item
+        item_args = {key: kargs[key] for key in Item.__dataclass_fields__ if key in kargs}
+        super().__init__(**item_args)  # Вызов конструктора родительского класса
+        # Устанавливаем оставшиеся аргументы для ItemMeta
+        for key, value in kargs.items():
+            if key not in Item.__dataclass_fields__:
+                setattr(self, key, value)
+        self.id = str(uuid.uuid4())
+
 
     @classmethod
     def fromItem(cls, item: Item, **kargs):
@@ -178,7 +190,7 @@ class ItemTree():
         rootNode = subTree.getNode(subTree.root)
 
         self.addLink(rootNode, parentId)
-
+        self.deleteNode(node)
         self.nodes.update(subTree.nodes)
         self.links.update(subTree.links)
 
@@ -196,22 +208,24 @@ class ItemTree():
     def updateNode(self, nodeId: str, node: ItemMeta):
         pass
 
-    def _deleteDeepLink(self, nodeId: str):
+    def __deleteDeep(self, nodeId: str):
         children = self.children(nodeId)
 
         for child in children:
-            self._deleteDeepLink(child)
+            self.__deleteDeep(child)
 
-        del self.links[nodeId]
+        self.nodes.pop(nodeId)
+
+        if nodeId in self.links:
+            del self.links[nodeId]
 
     def deleteNode(self, node: ItemMeta):
         parentId = self.parent(node)
         if parentId:
             self.links[parentId].remove(node.id)
 
-        self._deleteDeepLink(node.id)
+        self.__deleteDeep(node.id)
 
-        self.nodes.remove(node)
 
     def children(self, parentNodeId: str) -> list[str]:
         return self.links.get(parentNodeId, [])
