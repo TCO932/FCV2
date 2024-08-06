@@ -20,7 +20,9 @@ class MachineWidget(QtWidgets.QWidget):
         super().__init__()
         self.setupUi()
 
+        # TODO self.machine_options = list(filter(lambda key: key == itemMeta.machineType, ASSENBLING_MACHINES.keys()))
         for machine in MACHINES.values():
+
             self.selectMachine.addItem(machine.getFormattedName(), machine) 
 
         for module in MODULES.values():
@@ -29,8 +31,8 @@ class MachineWidget(QtWidgets.QWidget):
         self.selectMachine.currentIndexChanged.connect(self.on_machine_changed)
         self.selectModule.currentIndexChanged.connect(self.on_module_changed)
 
-        self.numberOfModulesSpinBox.valueChanged.connect(lambda value: value)
-        self.numberOfBeaconsSpinBox.valueChanged.connect(self.on_module_changed)
+        # self.numberOfModulesSpinBox.valueChanged.connect(lambda value: value)
+        # self.numberOfBeaconsSpinBox.valueChanged.connect(self.on_module_changed)
         
         self.calculateButton.pressed.connect(self.on_calculate_button)
 
