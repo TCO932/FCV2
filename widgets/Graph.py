@@ -1,5 +1,7 @@
+import time
+
 import requests
-from PyQt6.QtCore import QPoint, Qt, QObject, pyqtSignal
+from PyQt6.QtCore import QObject, QPoint, Qt, pyqtSignal
 from PyQt6.QtGui import QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import (QGraphicsLineItem, QGraphicsPixmapItem,
                              QGraphicsScene, QGraphicsTextItem, QGraphicsView,
@@ -13,7 +15,7 @@ class Node(QGraphicsPixmapItem):
         super().__init__()
         self.itemMeta: ItemMeta = itemMeta
 
-        self.setPixmap(self.load_image(self.itemMeta.image))
+        self.setPixmap(QPixmap(f'images/{itemMeta.name}.png'))
         self.setPos(x, y)
         self.setFlag(QGraphicsPixmapItem.GraphicsItemFlag.ItemIsSelectable)
 
@@ -101,6 +103,7 @@ class GraphView(QGraphicsView):
         self.nodes.clear()
         self.scene().clear()
         indent: int = 1
+
         def buildLevel(parentId: str = tree.root, level: int = 1):
             node = tree[parentId]
             nonlocal indent

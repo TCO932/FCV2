@@ -47,7 +47,7 @@ ASSENBLING_MACHINES = {
     'assembling-machine-3': ASSENBLING_MACHINE_3, 
 }
 
-RECIPES = {
+ITEMS = {
     'advanced-circuit': Item(
         name='advanced-circuit',
         elementary=False,

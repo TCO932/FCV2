@@ -8,37 +8,17 @@
 
 from dataclasses import dataclass
 from PyQt6 import QtCore, QtGui, QtWidgets
-from classes import Machine, Module
+from classes import EffectedMachine, Machine, Module
 
 from data import MACHINES, MODULES
 
 
-@dataclass
-class MachineWidgetModel():
-    machine: Machine
-    module: Module
-    modulesNumber: int
-    beaconsNumber: int
-
-
 class MachineWidget(QtWidgets.QWidget):
-    calculateClicked = QtCore.pyqtSignal(MachineWidgetModel)
+    calculateClicked = QtCore.pyqtSignal(EffectedMachine)
 
     def __init__(self):
         super().__init__()
         self.setupUi()
-
-        self.first_machine: Machine = next(iter(MACHINES.values()))
-        self.first_module: Module = next(iter(MODULES.values()))
-
-        self.model: MachineWidgetModel = MachineWidgetModel(
-            machine=self.first_machine,
-            module=self.first_module,
-            modulesNumber=0,
-            beaconsNumber=0,
-        )  
-
-        self.updateModel()
 
         for machine in MACHINES.values():
             self.selectMachine.addItem(machine.getFormattedName(), machine) 
@@ -46,32 +26,65 @@ class MachineWidget(QtWidgets.QWidget):
         for module in MODULES.values():
             self.selectModule.addItem(module.getFormattedName(), module) 
 
-
         self.selectMachine.currentIndexChanged.connect(self.on_machine_changed)
         self.selectModule.currentIndexChanged.connect(self.on_module_changed)
+
+        self.numberOfModulesSpinBox.valueChanged.connect(lambda value: value)
+        self.numberOfBeaconsSpinBox.valueChanged.connect(self.on_module_changed)
+        
         self.calculateButton.pressed.connect(self.on_calculate_button)
 
 
-    def updateModel(self):
-        self.on_model_updated()
+    def setModel(self, effectedMachine: EffectedMachine):
+        self.model = effectedMachine
 
-    def on_model_updated(self):
-        self.numberOfModulesSpinBox.setRange(0, self.model.machine.slots)
-        self.numberOfBeaconsSpinBox.setRange(0, self.model.machine.maxBeacons)
+        self.select_machine(effectedMachine)
+
+        if effectedMachine.modules:
+            moduleName, modulesNumber = next(iter(effectedMachine.modules.items())) #TODO добавить поддержку разных модулей
+            self.select_module(moduleName)
+            self.numberOfModulesSpinBox.setValue(modulesNumber)
+
+        self.numberOfBeaconsSpinBox.setValue(effectedMachine.beaconsNumber)
+
+    def select_machine(self, machine: Machine):
+        for index in range(self.selectMachine.count()):
+            if self.selectMachine.itemData(index).name == machine.name:
+                self.selectMachine.setCurrentIndex(index)
+                return
+
+    def select_module(self, module: Module): #TODO добавить поддержку разных модулей
+        for index in range(self.selectModule.count()):
+            if self.selectModule.itemData(index) == module:
+                self.selectModule.setCurrentIndex(index)
+                return
 
     def on_machine_changed(self, index):
         machine: Machine = self.selectMachine.itemData(index)
         self.numberOfModulesSpinBox.setRange(0, machine.slots)
         self.numberOfBeaconsSpinBox.setRange(0, machine.maxBeacons)
-
         print(f"Выбранная машина: {machine}")
 
-    def on_module_changed(self, index):
+    def on_module_changed(self, index): #TODO добавить поддержку разных модулей
         module: Module = self.selectModule.itemData(index)
+        self.model.modules.update({module: 0})
         print(f"Выбранный модуль: {module}")
 
+    def on_modules_number_changed(self, value): #TODO добавить поддержку разных модулей
+        module = next(iter(self.model.modules.keys())) 
+        self.model.modules.update({module: value})
+
+    def on_beacons_number_changed(self, value):
+        self.model.beaconsNumber = value
+
+
     def on_calculate_button(self):
-        self.calculateClicked.emit(self.model)
+        effectedMachine = EffectedMachine.fromMachine(
+            self.selectMachine.currentData(),
+            modules={self.selectModule.currentData(): self.numberOfModulesSpinBox.value()},
+            beaconsNumber=self.numberOfBeaconsSpinBox.value()
+        )
+        self.calculateClicked.emit(effectedMachine)
 
     def setupUi(self):
         self.setObjectName("MachineWidget")
