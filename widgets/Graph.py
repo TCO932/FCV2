@@ -30,17 +30,6 @@ class Node(QGraphicsPixmapItem):
     def __eq__(self, other):
         return isinstance(other, ItemMeta) and self.itemMeta.id == other.itemMeta.id
 
-    def load_image(self, image_url):
-        try:
-            response = requests.get(image_url)
-            response.raise_for_status()
-            image = QPixmap()
-            image.loadFromData(response.content)
-            return image
-        except Exception as e:
-            print(f"Error loading image from {image_url}: {e}")
-            return QPixmap()
-
     def itemChange(self, change, value):
         if change == QGraphicsPixmapItem.GraphicsItemChange.ItemScenePositionHasChanged:
             self.text_item.setPlainText(self.text_item.toPlainText())
