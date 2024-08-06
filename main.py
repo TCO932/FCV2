@@ -27,32 +27,20 @@ def time_it(func):
 
 global speedTree
 
-def oldItemClickHandler(item: Item):
-    global speedTree
-    itemMeta = ItemMeta.fromItem(
-        item, 
-        speed=1, 
-        effectedMachine=EffectedMachine.fromMachine(ASSENBLING_MACHINE_3)
-    )
-
-    speedTree = fcv2.initSpeedTree(itemMeta)
-    graphicsView.build_graph(speedTree)
-    itemTableView.setItem(itemMeta)
-    graphicsView.selectNode(itemMeta)
-
-    ui.tabWidget.setCurrentIndex(1)
-
 def itemClickHandler(item: Item):
     global speedTree
     itemMeta = ItemMeta.fromItem(
         item, 
-        speed=1, 
-        effectedMachine=EffectedMachine.fromMachine(ASSENBLING_MACHINE_3)
+        speed=0.1, 
+        effectedMachine=EffectedMachine.fromMachine(
+            ASSENBLING_MACHINE_3,
+            modules={PRODUCTIVITY_MODULE_3: 4},
+            beaconsNumber=12
+        )
     )
 
     speedTree = fcv2.buildSpeedTree(itemMeta)
     graphicsView.build_graph(speedTree)
-    itemTableView.setItem(itemMeta)
     graphicsView.selectNode(itemMeta)
 
     ui.tabWidget.setCurrentIndex(1)
