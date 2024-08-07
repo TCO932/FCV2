@@ -11,6 +11,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from classes import EffectedMachine, Machine, Module
 
 from data import MACHINES, MODULES
+from widgets.DraggableModuleWidget import DraggableModule, ModuleDropSlot
 
 
 class MachineWidget(QtWidgets.QWidget):
@@ -20,34 +21,43 @@ class MachineWidget(QtWidgets.QWidget):
         super().__init__()
         self.setupUi()
 
-        # TODO self.machine_options = list(filter(lambda key: key == itemMeta.machineType, ASSENBLING_MACHINES.keys()))
         for machine in MACHINES.values():
-
             self.selectMachine.addItem(machine.getFormattedName(), machine) 
 
-        for module in MODULES.values():
-            self.selectModule.addItem(module.getFormattedName(), module) 
-
         self.selectMachine.currentIndexChanged.connect(self.on_machine_changed)
-        self.selectModule.currentIndexChanged.connect(self.on_module_changed)
-
-        # self.numberOfModulesSpinBox.valueChanged.connect(lambda value: value)
-        # self.numberOfBeaconsSpinBox.valueChanged.connect(self.on_module_changed)
         
         self.calculateButton.pressed.connect(self.on_calculate_button)
 
 
-    def setModel(self, effectedMachine: EffectedMachine):
-        self.model = effectedMachine
+    def setModel(self, effectedMachine: EffectedMachine, noProd: bool = False):
+        self.effectedMachine = effectedMachine
 
-        self.select_machine(effectedMachine)
+        self.modules = MODULES['speed']
+        if noProd == False:
+            self.modules.update(MODULES['prod'])
 
+        for module in self.modules.values():
+            draggableModule = DraggableModule(module)
+            self.modulesLayout.addWidget(draggableModule)
+
+        self.selectedModules = []
         if effectedMachine.modules:
-            moduleName, modulesNumber = next(iter(effectedMachine.modules.items())) #TODO добавить поддержку разных модулей
-            self.select_module(moduleName)
-            self.numberOfModulesSpinBox.setValue(modulesNumber)
+            self.selectedModules = effectedMachine.modules
+
+        self.modulesSlots = [ModuleDropSlot(module) for module in self.selectedModules]
+        for slot in self.modulesSlots:
+            self.modulesSlotsLayout.addWidget(slot)
 
         self.numberOfBeaconsSpinBox.setValue(effectedMachine.beaconsNumber)
+        self.select_machine(effectedMachine)
+
+
+    # TODO use in future
+    def addToSlots(self, module: Module):
+        for slot in self.modulesSlots:
+            if slot.module is None:
+                slot.setData(module)
+
 
     def select_machine(self, machine: Machine):
         for index in range(self.selectMachine.count()):
@@ -55,35 +65,36 @@ class MachineWidget(QtWidgets.QWidget):
                 self.selectMachine.setCurrentIndex(index)
                 return
 
-    def select_module(self, module: Module): #TODO добавить поддержку разных модулей
-        for index in range(self.selectModule.count()):
-            if self.selectModule.itemData(index) == module:
-                self.selectModule.setCurrentIndex(index)
-                return
-
     def on_machine_changed(self, index):
         machine: Machine = self.selectMachine.itemData(index)
-        self.numberOfModulesSpinBox.setRange(0, machine.slots)
         self.numberOfBeaconsSpinBox.setRange(0, machine.maxBeacons)
+
+        for i, slot in enumerate(self.modulesSlots):
+            if i+1 > machine.slots:
+                slot.hide()
+
+
+        # while len of shown slots less than machine slots
+        while len(list(filter(lambda slot: not slot.isHidden(), self.modulesSlots))) < machine.slots:
+            hiddenSlots = list(filter(lambda slot: slot.isHidden(), self.modulesSlots))
+            if hiddenSlots:
+                hiddenSlots[0].show()
+            else:
+                slot = ModuleDropSlot()
+                self.modulesSlotsLayout.addWidget(slot)
+
+
         print(f"Выбранная машина: {machine}")
 
-    def on_module_changed(self, index): #TODO добавить поддержку разных модулей
-        module: Module = self.selectModule.itemData(index)
-        self.model.modules.update({module: 0})
-        print(f"Выбранный модуль: {module}")
-
-    def on_modules_number_changed(self, value): #TODO добавить поддержку разных модулей
-        module = next(iter(self.model.modules.keys())) 
-        self.model.modules.update({module: value})
-
-    def on_beacons_number_changed(self, value):
-        self.model.beaconsNumber = value
-
-
     def on_calculate_button(self):
+        modules = []
+        for slot in self.modulesSlots:
+            if slot.module is not None and not slot.isHidden():
+                modules.append(slot.module)
+
         effectedMachine = EffectedMachine.fromMachine(
             self.selectMachine.currentData(),
-            modules={self.selectModule.currentData(): self.numberOfModulesSpinBox.value()},
+            modules=modules,
             beaconsNumber=self.numberOfBeaconsSpinBox.value()
         )
         self.calculateClicked.emit(effectedMachine)
@@ -104,17 +115,30 @@ class MachineWidget(QtWidgets.QWidget):
         self.selectMachine = QtWidgets.QComboBox(parent=self)
         self.selectMachine.setObjectName("selectMachine")
         self.verticalLayout.addWidget(self.selectMachine)
-        self.selectModuleLabel = QtWidgets.QLabel(parent=self)
+
+        # Module layout
+        self.ModulesLabel = QtWidgets.QLabel(parent=self)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.selectModuleLabel.sizePolicy().hasHeightForWidth())
-        self.selectModuleLabel.setSizePolicy(sizePolicy)
-        self.selectModuleLabel.setObjectName("selectModuleLabel")
-        self.verticalLayout.addWidget(self.selectModuleLabel)
-        self.selectModule = QtWidgets.QComboBox(parent=self)
-        self.selectModule.setObjectName("selectModule")
-        self.verticalLayout.addWidget(self.selectModule)
+        sizePolicy.setHeightForWidth(self.ModulesLabel.sizePolicy().hasHeightForWidth())
+        self.ModulesLabel.setSizePolicy(sizePolicy)
+        self.ModulesLabel.setObjectName("selectModuleLabel")
+        self.verticalLayout.addWidget(self.ModulesLabel)
+
+        self.modulesLayout = QtWidgets.QHBoxLayout()
+        self.modulesLayout.setObjectName("selectModule")
+        self.modulesLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.verticalLayout.addLayout(self.modulesLayout)
+
+        self.modulesSlotsLayout = QtWidgets.QHBoxLayout()
+        self.modulesSlotsLayout.setObjectName("modulesSlots")
+        self.modulesSlotsLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.verticalLayout.addLayout(self.modulesSlotsLayout)
+
+        # end Module layout
+
+
         self.numberOfModulesLabel = QtWidgets.QLabel(parent=self)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -148,7 +172,7 @@ class MachineWidget(QtWidgets.QWidget):
         _translate = QtCore.QCoreApplication.translate
         MachineWidget.setWindowTitle(_translate("MachineWidget", "Form"))
         self.selectMachineLabel.setText(_translate("MachineWidget", "Machine:"))
-        self.selectModuleLabel.setText(_translate("MachineWidget", "Module:"))
+        self.ModulesLabel.setText(_translate("MachineWidget", "Module:"))
         self.numberOfModulesLabel.setText(_translate("MachineWidget", "Number of Modules:"))
         self.numberOfBeaconsLabel.setText(_translate("MachineWidget", "Number of Beacons"))
         self.calculateButton.setText(_translate("MachineWidget", "Calculate"))

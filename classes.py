@@ -1,3 +1,4 @@
+import json
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -14,6 +15,18 @@ class Module(FormattedNameProtocol):
     name: Literal['productivity-module-1', 'productivity-module-2', 'productivity-module-3', 'speed-module-1', 'speed-module-2', 'speed-module-3']
     productivity: float
     speed: float
+
+    @classmethod
+    def fromJSON(cls, jsonModule: str):
+        moduleData = json.loads(jsonModule)
+        return cls(**moduleData)
+
+    def toJSON(self):
+        return json.dumps({
+            'name': self.name,
+            'productivity': self.productivity,
+            'speed': self.speed
+        })
 
     def __hash__(self):
         return hash(self.name)
@@ -59,7 +72,7 @@ class Machine(FormattedNameProtocol):
 
 @dataclass
 class EffectedMachine(Machine):
-    modules: dict[Module: int] = field(default_factory=dict)
+    modules: list[Module] = field(default_factory=list)
     beaconsNumber: int = 0
 
     @classmethod
@@ -71,16 +84,16 @@ class EffectedMachine(Machine):
     @property
     def productivity(self) -> float:
         productivity = self.basicProductivity
-        for module, amount in self.modules.items():
-            productivity += module.productivity * amount
+        for module in self.modules:
+            productivity += module.productivity
         return productivity
 
     @property
     def speedNoProd(self) -> float:
         speed = self.basicSpeed
         modulesSpeed = 0
-        for module, amount in self.modules.items():
-            modulesSpeed += module.speed * amount
+        for module in self.modules:
+            modulesSpeed += module.speed
 
         speed = speed * (1 + modulesSpeed + self.beaconsNumber*0.5)
         return speed
@@ -121,10 +134,8 @@ class ItemMeta(Item):
             return (self.speed*self.production_time) / (self.quantity*self.effectedMachine.speed)
 
     def __init__(self, **kargs):
-        # Извлекаем аргументы, относящиеся к Item
         item_args = {key: kargs[key] for key in Item.__dataclass_fields__ if key in kargs}
-        super().__init__(**item_args)  # Вызов конструктора родительского класса
-        # Устанавливаем оставшиеся аргументы для ItemMeta
+        super().__init__(**item_args)
         for key, value in kargs.items():
             if key not in Item.__dataclass_fields__:
                 setattr(self, key, value)

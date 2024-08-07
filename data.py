@@ -1,20 +1,24 @@
 from classes import Item, Machine, Module
 
-PRODUCTIVITY_MODULE_1 = Module('productivity-module-1', 0.04, -0.05)
+PRODUCTIVITY_MODULE_1 = Module('productivity-module', 0.04, -0.05)
 PRODUCTIVITY_MODULE_2 = Module('productivity-module-2', 0.06, -0.1)
 PRODUCTIVITY_MODULE_3 = Module('productivity-module-3', 0.1, -0.15)
 
-SPEED_MODULE_1 = Module('speed-module-1', 0.0, 0.2)
+SPEED_MODULE_1 = Module('speed-module', 0.0, 0.2)
 SPEED_MODULE_2 = Module('speed-module-2', 0.0, 0.3)
 SPEED_MODULE_3 = Module('speed-module-3', 0.0, 0.5)
 
 MODULES = {
-    'productivity-module-1': PRODUCTIVITY_MODULE_1,
-    'productivity-module-2': PRODUCTIVITY_MODULE_2,
-    'productivity-module-3': PRODUCTIVITY_MODULE_3,
-    'speed-module-1': SPEED_MODULE_1,
-    'speed-module-2': SPEED_MODULE_2,
-    'speed-module-3': SPEED_MODULE_3,
+    'prod': {
+        'productivity-module': PRODUCTIVITY_MODULE_1,
+        'productivity-module-2': PRODUCTIVITY_MODULE_2,
+        'productivity-module-3': PRODUCTIVITY_MODULE_3,
+    },
+    'speed': {
+        'speed-module': SPEED_MODULE_1,
+        'speed-module-2': SPEED_MODULE_2,
+        'speed-module-3': SPEED_MODULE_3,
+    }
 }
 
 MINING_PROD = 3.3

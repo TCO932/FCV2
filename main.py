@@ -34,7 +34,7 @@ def itemClickHandler(item: Item):
         speed=0.1, 
         effectedMachine=EffectedMachine.fromMachine(
             ASSENBLING_MACHINE_3,
-            modules={PRODUCTIVITY_MODULE_3: 4},
+            modules=[PRODUCTIVITY_MODULE_3, PRODUCTIVITY_MODULE_3, PRODUCTIVITY_MODULE_3, PRODUCTIVITY_MODULE_3],
             beaconsNumber=12
         )
     )
