@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import QApplication
 import FCV2 as fcv2
 from classes import EffectedMachine, ItemMeta, ItemTree
 from data import *
-from qtUI.Tabs_ui import Ui_MainWindow
+from widgets.MainWindow import MainWindow
 from widgets.Graph import GraphView, Node
 from widgets.ItemsListTable import ItemsListTableView
 from widgets.ItemTable import ItemTableView
@@ -43,7 +43,7 @@ def itemClickHandler(item: Item):
     graphicsView.build_graph(speedTree)
     graphicsView.selectNode(itemMeta)
 
-    ui.tabWidget.setCurrentIndex(1)
+    mainWindow.tabWidget.setCurrentIndex(1)
 
 def buildTree(itemMeta: ItemMeta, effectedMachine: EffectedMachine):
     updTree = fcv2.buildChildrenSpeed(itemMeta, effectedMachine, speedTree)
@@ -54,7 +54,7 @@ def nodeSelectioHandler(node: Node):
     itemTableView.setItem(node.itemMeta)
     machineWidget.setModel(node.itemMeta.effectedMachine)
 
-def calculateClickHandler(effectedMachine: EffectedMachine):
+def machineSetHandler(effectedMachine: EffectedMachine):
     global speedTree
     currentItemMeta = itemTableView.itemMeta
     currentItemMeta.effectedMachine = effectedMachine
@@ -62,6 +62,9 @@ def calculateClickHandler(effectedMachine: EffectedMachine):
     speedTree.replaceNodeWithSubTree(currentItemMeta, speedSubTree)
     graphicsView.build_graph(speedTree)
     print(currentItemMeta)
+
+def rootItemSpeedSettedHandler(speed: float):
+    print(speed)
 
 
 if __name__ == "__main__":
@@ -72,14 +75,15 @@ if __name__ == "__main__":
     itemsListTableView = ItemsListTableView(ITEMS)
 
     graphicsView = GraphView(itemTableView)
-    ui = Ui_MainWindow(itemsListTableView, graphicsView, itemTableView, machineWidget)
+    mainWindow = MainWindow(window, itemsListTableView, graphicsView, itemTableView, machineWidget)
 
     itemsListTableView.itemClicked.connect(itemClickHandler)
     
     graphicsView.nodeSelected.connect(nodeSelectioHandler)
     
-    machineWidget.calculateClicked.connect(calculateClickHandler)
+    machineWidget.machineSetted.connect(machineSetHandler)
 
-    ui.setupUi(window)
-    window.show()
+    mainWindow.rootItemSpeedSetted.connect(rootItemSpeedSettedHandler)
+
+    mainWindow.show()
     sys.exit(app.exec())

@@ -9,20 +9,27 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow(object):
-    def __init__(self, itemsListTableView: QtWidgets.QTableView, graphicsView: QtWidgets.QGraphicsView, itemTableView: QtWidgets.QTableView, machineTableView: QtWidgets.QTableView):
+class MainWindow(QtWidgets.QMainWindow):
+    rootItemSpeedSetted = QtCore.pyqtSignal(float)
+
+    def __init__(self, mainWindow: QtWidgets.QMainWindow, itemsListTableView: QtWidgets.QTableView, graphicsView: QtWidgets.QGraphicsView, itemTableView: QtWidgets.QTableView, machineTableView: QtWidgets.QTableView):
+        super().__init__(mainWindow)
         self.itemsListTableView = itemsListTableView 
         self.graphicsView = graphicsView 
         self.itemTableView = itemTableView 
-        self.machineTableView = machineTableView 
+        self.machineTableView = machineTableView
+        self.setupUi()
 
-    def setupUi(self, MainWindow: QtWidgets.QMainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
-        MainWindow.setMinimumSize(QtCore.QSize(800, 600))
-        MainWindow.setDocumentMode(False)
-        MainWindow.setUnifiedTitleAndToolBarOnMac(False)
-        self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
+    def on__editing_finnished(self):
+        self.rootItemSpeedSetted.emit(self.rootItemSpeedSpinBox.value())
+
+    def setupUi(self):
+        self.setObjectName("MainWindow")
+        self.resize(800, 600)
+        self.setMinimumSize(QtCore.QSize(800, 600))
+        self.setDocumentMode(False)
+        self.setUnifiedTitleAndToolBarOnMac(False)
+        self.centralwidget = QtWidgets.QWidget(parent=self)
         self.centralwidget.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(1)
@@ -78,6 +85,18 @@ class Ui_MainWindow(object):
         self.craftTabVSplitter.setSizePolicy(sizePolicy)
         self.craftTabVSplitter.setOrientation(QtCore.Qt.Orientation.Vertical)
         self.craftTabVSplitter.setObjectName("craftTabVSplitter")
+
+        self.rootItemSpeedGroup = QtWidgets.QGroupBox(parent=self.craftTabVSplitter)
+        self.rootItemSpeedGroup.setObjectName("rootItemSpeedGroup")
+        self.rootItemSpeedGroupLayout = QtWidgets.QVBoxLayout(self.rootItemSpeedGroup)
+
+        self.rootItemSpeedSpinBox = QtWidgets.QDoubleSpinBox()
+        self.rootItemSpeedSpinBox.setObjectName("rootItemSpeedSpinBox")
+        self.rootItemSpeedSpinBox.setDecimals(2)
+        self.rootItemSpeedSpinBox.editingFinished.connect(self.on__editing_finnished)
+        self.rootItemSpeedGroupLayout.addWidget(self.rootItemSpeedSpinBox)
+
+
         self.itemTableViewGroup = QtWidgets.QGroupBox(parent=self.craftTabVSplitter)
         self.itemTableViewGroup.setObjectName("itemTableViewGroup")
         self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.itemTableViewGroup)
@@ -90,6 +109,7 @@ class Ui_MainWindow(object):
         self.itemTableView.setSizePolicy(sizePolicy)
         self.itemTableView.setObjectName("itemTableView")
         self.verticalLayout_7.addWidget(self.itemTableView)
+
         self.machineTableViewGroup = QtWidgets.QGroupBox(parent=self.craftTabVSplitter)
         self.machineTableViewGroup.setObjectName("machineTableViewGroup")
         self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.machineTableViewGroup)
@@ -105,16 +125,17 @@ class Ui_MainWindow(object):
         self.verticalLayout_9.addWidget(self.craftTabHSplitter)
         self.tabWidget.addTab(self.craftTab, "")
         self.verticalLayout_6.addWidget(self.tabWidget)
-        MainWindow.setCentralWidget(self.centralwidget)
+        self.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MainWindow)
+        self.retranslateUi(self)
         self.tabWidget.setCurrentIndex(0)
 
     def retranslateUi(self, MainWindow: QtWidgets.QMainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.searchButton.setText(_translate("MainWindow", "PushButton"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "FCV2"))
+        self.searchButton.setText(_translate("MainWindow", "Search"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.searchTab), _translate("MainWindow", "searchTab"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.craftTab), _translate("MainWindow", "craftTab"))
+        self.rootItemSpeedGroup.setTitle(_translate("MainWindow", "Root Item Speed"))
         self.itemTableViewGroup.setTitle(_translate("MainWindow", "Item"))
         self.machineTableViewGroup.setTitle(_translate("MainWindow", "Machine"))
