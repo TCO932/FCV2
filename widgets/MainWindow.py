@@ -12,8 +12,8 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class MainWindow(QtWidgets.QMainWindow):
     rootItemSpeedSetted = QtCore.pyqtSignal(float)
 
-    def __init__(self, mainWindow: QtWidgets.QMainWindow, itemsListTableView: QtWidgets.QTableView, graphicsView: QtWidgets.QGraphicsView, itemTableView: QtWidgets.QTableView, machineTableView: QtWidgets.QTableView):
-        super().__init__(mainWindow)
+    def __init__(self, itemsListTableView: QtWidgets.QTableView, graphicsView: QtWidgets.QGraphicsView, itemTableView: QtWidgets.QTableView, machineTableView: QtWidgets.QTableView):
+        super().__init__()
         self.itemsListTableView = itemsListTableView 
         self.graphicsView = graphicsView 
         self.itemTableView = itemTableView 
