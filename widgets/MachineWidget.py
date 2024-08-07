@@ -8,7 +8,7 @@
 
 from dataclasses import dataclass
 from PyQt6 import QtCore, QtGui, QtWidgets
-from classes import EffectedMachine, Machine, Module
+from classes import EffectedMachine, ItemMeta, Machine, Module
 
 from data import MACHINES, MODULES
 from widgets.DraggableModuleWidget import DraggableModule, ModuleDropSlot
@@ -28,28 +28,39 @@ class MachineWidget(QtWidgets.QWidget):
         
         self.setMachineButton.pressed.connect(self.on_set_machine_button)
 
-
-    def setModel(self, effectedMachine: EffectedMachine, noProd: bool = False):
-        self.effectedMachine = effectedMachine
-
-        self.modules = MODULES['speed']
-        if noProd == False:
-            self.modules.update(MODULES['prod'])
-
+        self.modules = MODULES['prod'] | MODULES['speed']
         for module in self.modules.values():
             draggableModule = DraggableModule(module)
             self.modulesLayout.addWidget(draggableModule)
 
-        self.selectedModules = []
-        if effectedMachine.modules:
-            self.selectedModules = effectedMachine.modules
-
-        self.modulesSlots = [ModuleDropSlot(module) for module in self.selectedModules]
-        for slot in self.modulesSlots:
+        self.modulesSlots = []
+        for i in range(4):
+            slot = ModuleDropSlot()
+            self.modulesSlots.append(slot)
             self.modulesSlotsLayout.addWidget(slot)
 
-        self.beaconsNumberSlider.setValue(effectedMachine.beaconsNumber)
-        self.select_machine(effectedMachine)
+
+    def setModel(self, itemMeta: ItemMeta):
+        self.effectedMachine = itemMeta.effectedMachine
+
+        for i in range(3):
+            if itemMeta.no_prod:
+                self.modulesLayout.itemAt(i).widget().hide()
+            else:
+                self.modulesLayout.itemAt(i).widget().show()
+
+        self.selectedModules = []
+        if self.effectedMachine.modules:
+            self.selectedModules = self.effectedMachine.modules
+
+        for i in range(4):
+            self.modulesSlotsLayout.itemAt(i).widget().clear()
+
+        for i, module in enumerate(self.selectedModules):
+            self.modulesSlotsLayout.itemAt(i).widget().setData(module)
+
+        self.beaconsNumberSlider.setValue(self.effectedMachine.beaconsNumber)
+        self.select_machine(self.effectedMachine)
 
 
     # TODO use in future: add module by left click
