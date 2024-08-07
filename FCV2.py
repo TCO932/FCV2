@@ -20,6 +20,7 @@ def time_it(func):
         return result                       # Возврат результата оригинальной функции
     return wrapper
 
+# old
 @cache.memoize(expire=3600)
 def buildCraftTree(itemName: str, amount: float, machine: Machine, craftTree: Tree = None) -> Tree:
     craftTree = craftTree if craftTree is not None else Tree()
@@ -46,32 +47,27 @@ def buildCraftTree(itemName: str, amount: float, machine: Machine, craftTree: Tr
 # old
 def calcRes(craftTree: Tree):
     res: dict[str: float] = {}
-
     for node in craftTree.all_nodes():
         itemName = node.tag
         amount = node.data.amount
-
         if itemName in res:
             res[itemName] += amount
         else:
             res[itemName] = amount
-
     return res
 
 # old
 def craftTreeWithAmounts(craftTree: Tree) -> Tree:
     tree = Tree(craftTree.subtree(craftTree.root), deep=True)
-
     for nodeName in craftTree.expand_tree():
         node = tree[nodeName]
         node.tag = node.tag + ' x{}'.format(node.data.amount)
-
     return tree
 
 @cache.memoize(expire=3600)
 @time_it
 def buildSpeedTree(itemMeta: ItemMeta) -> ItemTree:
-    def buildSpeedNode(itemMeta: ItemMeta, parentId: Optional[str] = None):
+    def __buildSpeedNode(itemMeta: ItemMeta, parentId: Optional[str] = None):
         itemTree.addNode(itemMeta, parentId)
 
         if (itemMeta.elementary): return
@@ -85,12 +81,30 @@ def buildSpeedTree(itemMeta: ItemMeta) -> ItemTree:
             quantityModifier = componentMeta.quantity if componentMeta.quantity > 0 else 1 #TODO fix
             amountModifier = quantityModifier * (1 + prodModifier)
             componentMeta.speed = componentAmount*itemMeta.speed/amountModifier
-            buildSpeedNode(componentMeta, itemMeta.id)
+            __buildSpeedNode(componentMeta, itemMeta.id)
 
     itemTree = ItemTree()
-    buildSpeedNode(itemMeta)
+    __buildSpeedNode(itemMeta)
 
     return itemTree
+
+
+def recalcSpeedSubtree(itemMeta: ItemMeta, itemTree: ItemTree):
+    def __recalcNode(itemMeta: ItemMeta):
+        children = {}
+        for childId in itemTree.children(itemMeta.id):
+            childMeta = itemTree.getNode(childId)
+            children.update({childMeta.name: childMeta})
+
+        prodModifier = itemMeta.effectedMachine.productivity
+        for componentName, componentAmount in itemMeta.recipe.items():
+            componentMeta = children[componentName]
+            quantityModifier = componentMeta.quantity if componentMeta.quantity > 0 else 1 #TODO fix
+            amountModifier = quantityModifier * (1 + prodModifier)
+            componentMeta.speed = componentAmount*itemMeta.speed/amountModifier
+            __recalcNode(componentMeta)
+
+    __recalcNode(itemMeta)
 
 
 def initSpeedTree(itemMeta: ItemMeta, itemTree: ItemTree | None = None) -> ItemTree:
