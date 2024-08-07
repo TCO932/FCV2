@@ -58,7 +58,9 @@ class MachineWidget(QtWidgets.QWidget):
 
         for i, module in enumerate(self.selectedModules):
             self.modulesSlotsLayout.itemAt(i).widget().setData(module)
-
+        
+        self.beaconsNumberValue.setText(str(self.effectedMachine.beaconsNumber))
+        self.beaconsNumberSlider.setRange(0, self.effectedMachine.maxBeacons)
         self.beaconsNumberSlider.setValue(self.effectedMachine.beaconsNumber)
         self.select_machine(self.effectedMachine)
 
