@@ -23,6 +23,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def on__editing_finnished(self):
         self.rootItemSpeedSetted.emit(self.rootItemSpeedSpinBox.value())
 
+    def getRootItemSpeed(self):
+        return self.rootItemSpeedSpinBox.value()
+
     def setupUi(self):
         self.setObjectName("MainWindow")
         self.resize(800, 600)
@@ -93,6 +96,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.rootItemSpeedSpinBox = QtWidgets.QDoubleSpinBox()
         self.rootItemSpeedSpinBox.setObjectName("rootItemSpeedSpinBox")
         self.rootItemSpeedSpinBox.setDecimals(2)
+        self.rootItemSpeedSpinBox.setValue(1)
         self.rootItemSpeedSpinBox.editingFinished.connect(self.on__editing_finnished)
         self.rootItemSpeedGroupLayout.addWidget(self.rootItemSpeedSpinBox)
 
