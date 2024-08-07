@@ -15,7 +15,7 @@ from widgets.DraggableModuleWidget import DraggableModule, ModuleDropSlot
 
 
 class MachineWidget(QtWidgets.QWidget):
-    calculateClicked = QtCore.pyqtSignal(EffectedMachine)
+    machineSetted = QtCore.pyqtSignal(EffectedMachine)
 
     def __init__(self):
         super().__init__()
@@ -26,7 +26,7 @@ class MachineWidget(QtWidgets.QWidget):
 
         self.selectMachine.currentIndexChanged.connect(self.on_machine_changed)
         
-        self.calculateButton.pressed.connect(self.on_calculate_button)
+        self.setMachineButton.pressed.connect(self.on_set_machine_button)
 
 
     def setModel(self, effectedMachine: EffectedMachine, noProd: bool = False):
@@ -48,11 +48,11 @@ class MachineWidget(QtWidgets.QWidget):
         for slot in self.modulesSlots:
             self.modulesSlotsLayout.addWidget(slot)
 
-        self.numberOfBeaconsSpinBox.setValue(effectedMachine.beaconsNumber)
+        self.beaconsNumberSlider.setValue(effectedMachine.beaconsNumber)
         self.select_machine(effectedMachine)
 
 
-    # TODO use in future
+    # TODO use in future: add module by left click
     def addToSlots(self, module: Module):
         for slot in self.modulesSlots:
             if slot.module is None:
@@ -67,7 +67,7 @@ class MachineWidget(QtWidgets.QWidget):
 
     def on_machine_changed(self, index):
         machine: Machine = self.selectMachine.itemData(index)
-        self.numberOfBeaconsSpinBox.setRange(0, machine.maxBeacons)
+        self.beaconsNumberSlider.setRange(0, machine.maxBeacons)
 
         for i, slot in enumerate(self.modulesSlots):
             if i+1 > machine.slots:
@@ -86,7 +86,7 @@ class MachineWidget(QtWidgets.QWidget):
 
         print(f"Выбранная машина: {machine}")
 
-    def on_calculate_button(self):
+    def on_set_machine_button(self):
         modules = []
         for slot in self.modulesSlots:
             if slot.module is not None and not slot.isHidden():
@@ -95,15 +95,16 @@ class MachineWidget(QtWidgets.QWidget):
         effectedMachine = EffectedMachine.fromMachine(
             self.selectMachine.currentData(),
             modules=modules,
-            beaconsNumber=self.numberOfBeaconsSpinBox.value()
+            beaconsNumber=self.beaconsNumberSlider.value()
         )
-        self.calculateClicked.emit(effectedMachine)
+        self.machineSetted.emit(effectedMachine)
 
     def setupUi(self):
         self.setObjectName("MachineWidget")
         self.resize(250, 300)
         self.verticalLayout = QtWidgets.QVBoxLayout(self)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         self.selectMachineLabel = QtWidgets.QLabel(parent=self)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -117,19 +118,28 @@ class MachineWidget(QtWidgets.QWidget):
         self.verticalLayout.addWidget(self.selectMachine)
 
         # Module layout
-        self.ModulesLabel = QtWidgets.QLabel(parent=self)
+        self.modulesLabel = QtWidgets.QLabel(parent=self)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.ModulesLabel.sizePolicy().hasHeightForWidth())
-        self.ModulesLabel.setSizePolicy(sizePolicy)
-        self.ModulesLabel.setObjectName("selectModuleLabel")
-        self.verticalLayout.addWidget(self.ModulesLabel)
+        sizePolicy.setHeightForWidth(self.modulesLabel.sizePolicy().hasHeightForWidth())
+        self.modulesLabel.setSizePolicy(sizePolicy)
+        self.modulesLabel.setObjectName("selectModuleLabel")
+        self.verticalLayout.addWidget(self.modulesLabel)
 
         self.modulesLayout = QtWidgets.QHBoxLayout()
         self.modulesLayout.setObjectName("selectModule")
         self.modulesLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.verticalLayout.addLayout(self.modulesLayout)
+
+        self.modulesSlotsLabel = QtWidgets.QLabel(parent=self)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.modulesLabel.sizePolicy().hasHeightForWidth())
+        self.modulesSlotsLabel.setSizePolicy(sizePolicy)
+        self.modulesSlotsLabel.setObjectName("modulesSlotsLabel")
+        self.verticalLayout.addWidget(self.modulesSlotsLabel)
 
         self.modulesSlotsLayout = QtWidgets.QHBoxLayout()
         self.modulesSlotsLayout.setObjectName("modulesSlots")
@@ -138,32 +148,37 @@ class MachineWidget(QtWidgets.QWidget):
 
         # end Module layout
 
+        # Beacons number
+        self.beaconsNumberLabelLayout = QtWidgets.QHBoxLayout()
+        self.beaconsNumberLabelLayout.setObjectName("beaconsNumberLabelLayout")
+        self.beaconsNumberLabelLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.verticalLayout.addLayout(self.beaconsNumberLabelLayout)
 
-        self.numberOfModulesLabel = QtWidgets.QLabel(parent=self)
+        self.beaconsNumberLabel = QtWidgets.QLabel(parent=self)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.numberOfModulesLabel.sizePolicy().hasHeightForWidth())
-        self.numberOfModulesLabel.setSizePolicy(sizePolicy)
-        self.numberOfModulesLabel.setObjectName("numberOfModulesLabel")
-        self.verticalLayout.addWidget(self.numberOfModulesLabel)
-        self.numberOfModulesSpinBox = QtWidgets.QSpinBox(parent=self)
-        self.numberOfModulesSpinBox.setObjectName("numberOfModulesSpinBox")
-        self.verticalLayout.addWidget(self.numberOfModulesSpinBox)
-        self.numberOfBeaconsLabel = QtWidgets.QLabel(parent=self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.numberOfBeaconsLabel.sizePolicy().hasHeightForWidth())
-        self.numberOfBeaconsLabel.setSizePolicy(sizePolicy)
-        self.numberOfBeaconsLabel.setObjectName("numberOfBeaconsLabel")
-        self.verticalLayout.addWidget(self.numberOfBeaconsLabel)
-        self.numberOfBeaconsSpinBox = QtWidgets.QSpinBox(parent=self)
-        self.numberOfBeaconsSpinBox.setObjectName("numberOfBeaconsSpinBox")
-        self.verticalLayout.addWidget(self.numberOfBeaconsSpinBox)
-        self.calculateButton = QtWidgets.QPushButton(parent=self)
-        self.calculateButton.setObjectName("calculateButton")
-        self.verticalLayout.addWidget(self.calculateButton)
+        sizePolicy.setHeightForWidth(self.beaconsNumberLabel.sizePolicy().hasHeightForWidth())
+        self.beaconsNumberLabel.setSizePolicy(sizePolicy)
+        self.beaconsNumberLabel.setObjectName("numberOfBeaconsLabel")
+        self.beaconsNumberLabelLayout.addWidget(self.beaconsNumberLabel)
+
+        self.beaconsNumberValue = QtWidgets.QLabel(parent=self)
+        self.beaconsNumberLabelLayout.addWidget(self.beaconsNumberValue)
+
+
+        self.beaconsNumberSlider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.beaconsNumberSlider.setObjectName("numberOfBeaconsSpinBox")
+        self.beaconsNumberSlider.setTickInterval(1)
+        self.beaconsNumberSlider.setTickPosition(QtWidgets.QSlider.TickPosition.TicksBelow)
+        self.beaconsNumberSlider.valueChanged.connect(lambda value: self.beaconsNumberValue.setText(str(value)))
+        self.verticalLayout.addWidget(self.beaconsNumberSlider)
+
+        # end Beacons number
+        
+        self.setMachineButton = QtWidgets.QPushButton(parent=self)
+        self.setMachineButton.setObjectName("calculateButton")
+        self.verticalLayout.addWidget(self.setMachineButton)
 
         self.retranslateUi(self)
         QtCore.QMetaObject.connectSlotsByName(self)
@@ -172,10 +187,12 @@ class MachineWidget(QtWidgets.QWidget):
         _translate = QtCore.QCoreApplication.translate
         MachineWidget.setWindowTitle(_translate("MachineWidget", "Form"))
         self.selectMachineLabel.setText(_translate("MachineWidget", "Machine:"))
-        self.ModulesLabel.setText(_translate("MachineWidget", "Module:"))
-        self.numberOfModulesLabel.setText(_translate("MachineWidget", "Number of Modules:"))
-        self.numberOfBeaconsLabel.setText(_translate("MachineWidget", "Number of Beacons"))
-        self.calculateButton.setText(_translate("MachineWidget", "Calculate"))
+        self.modulesLabel.setText(_translate("MachineWidget", "Modules:"))
+        self.modulesLabel.setToolTip(_translate("MachineWidget", "Drag module and drop into slot."))
+        self.modulesSlotsLabel.setText(_translate("MachineWidget", "Machine slots:"))
+        self.modulesSlotsLabel.setToolTip(_translate("MachineWidget", "Drop module into slot. Right click to remove module."))
+        self.beaconsNumberLabel.setText(_translate("MachineWidget", "Number of Beacons:"))
+        self.setMachineButton.setText(_translate("MachineWidget", "Set Machine"))
 
 
 if __name__ == "__main__":
