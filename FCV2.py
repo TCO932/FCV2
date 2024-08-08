@@ -67,20 +67,27 @@ def craftTreeWithAmounts(craftTree: Tree) -> Tree:
 @cache.memoize(expire=3600)
 @time_it
 def buildSpeedTree(itemMeta: ItemMeta) -> ItemTree:
+    machines = list(MACHINES.values())
     def __buildSpeedNode(itemMeta: ItemMeta, parentId: Optional[str] = None):
         itemTree.addNode(itemMeta, parentId)
 
         if (itemMeta.elementary): return
 
         for componentName, componentAmount in itemMeta.recipe.items():
+            item: Item = ITEMS.get(componentName)
+
+            machine = list(filter(lambda machine: machine.type == item.machineType, machines))[0]
+            effectedMachine = EffectedMachine.fromMachine(machine)
+
             componentMeta = ItemMeta.fromItem(
-                ITEMS.get(componentName), 
-                effectedMachine=itemMeta.effectedMachine, 
+                item, 
+                effectedMachine=effectedMachine, 
             )
-            prodModifier = itemMeta.effectedMachine.productivity
+
+            prodModifier = 0 if itemMeta.no_prod else itemMeta.effectedMachine.productivity
             quantityModifier = componentMeta.quantity if componentMeta.quantity > 0 else 1 #TODO fix
-            amountModifier = quantityModifier * (1 + prodModifier)
-            componentMeta.speed = componentAmount*itemMeta.speed/amountModifier
+            # amountModifier = quantityModifier * (1 + prodModifier)
+            componentMeta.speed = componentAmount*itemMeta.speed/(1 + prodModifier)
             __buildSpeedNode(componentMeta, itemMeta.id)
 
     itemTree = ItemTree()
@@ -100,8 +107,8 @@ def recalcSpeedSubtree(itemMeta: ItemMeta, itemTree: ItemTree):
         for componentName, componentAmount in itemMeta.recipe.items():
             componentMeta = children[componentName]
             quantityModifier = componentMeta.quantity if componentMeta.quantity > 0 else 1 #TODO fix
-            amountModifier = quantityModifier * (1 + prodModifier)
-            componentMeta.speed = componentAmount*itemMeta.speed/amountModifier
+            # amountModifier = quantityModifier * (1 + prodModifier)
+            componentMeta.speed = componentAmount*itemMeta.speed/(1 + prodModifier)
             __recalcNode(componentMeta)
 
     __recalcNode(itemMeta)
