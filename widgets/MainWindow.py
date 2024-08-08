@@ -95,7 +95,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.rootItemSpeedSpinBox = QtWidgets.QDoubleSpinBox()
         self.rootItemSpeedSpinBox.setObjectName("rootItemSpeedSpinBox")
-        self.rootItemSpeedSpinBox.setDecimals(2)
+        self.rootItemSpeedSpinBox.setDecimals(5)
         self.rootItemSpeedSpinBox.setValue(1)
         self.rootItemSpeedSpinBox.editingFinished.connect(self.on__editing_finnished)
         self.rootItemSpeedGroupLayout.addWidget(self.rootItemSpeedSpinBox)
