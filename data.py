@@ -9,16 +9,12 @@ SPEED_MODULE_2 = Module('speed-module-2', 0.0, 0.3)
 SPEED_MODULE_3 = Module('speed-module-3', 0.0, 0.5)
 
 MODULES = {
-    'prod': {
-        'productivity-module': PRODUCTIVITY_MODULE_1,
-        'productivity-module-2': PRODUCTIVITY_MODULE_2,
-        'productivity-module-3': PRODUCTIVITY_MODULE_3,
-    },
-    'speed': {
-        'speed-module': SPEED_MODULE_1,
-        'speed-module-2': SPEED_MODULE_2,
-        'speed-module-3': SPEED_MODULE_3,
-    }
+    'productivity-module': PRODUCTIVITY_MODULE_1,
+    'productivity-module-2': PRODUCTIVITY_MODULE_2,
+    'productivity-module-3': PRODUCTIVITY_MODULE_3,
+    'speed-module': SPEED_MODULE_1,
+    'speed-module-2': SPEED_MODULE_2,
+    'speed-module-3': SPEED_MODULE_3,
 }
 
 MINING_PROD = 3.3
@@ -30,8 +26,8 @@ ELECTRIC_FURNACE = Machine('electric-furnace', 2, 2, 0, 12, 'furnace')
 OIL_REFINERY = Machine('oil-refinery', 3, 1, 0, 16, 'oil-refinery')
 CHEMICAL_PLANT = Machine('chemical-plant', 3, 1, 0, 12, 'chemical-plant')
 CENTRIFUGE = Machine('centrifuge', 2, 2, 0, 12, 'centrifuge')
-LAB = Machine('lab', 2, 1, 0, 12, 'lab')
-LAB_MAX_SPEED = Machine('lab', 2, 1.5, 0, 12, 'lab')
+# LAB = Machine('lab', 2, 1, 0, 12, 'lab')
+LAB_MAX_SPEED = Machine('lab', 2, 3.5, 0, 12, 'lab')
 ROCKET_SILO = Machine('rocket-silo', 4, 1, 0, 20, 'rocket-silo')
 ELECTRIC_MINING_FRILL = Machine('electric-mining-drill', 3, 0.5, MINING_PROD, 12, 'mining-drill')
 
@@ -43,7 +39,7 @@ MACHINES = {
     'oil-refinery': OIL_REFINERY,
     'chemical-plant': CHEMICAL_PLANT,
     'centrifuge': CENTRIFUGE,
-    'lab': LAB,
+    # 'lab': LAB,
     'lab': LAB_MAX_SPEED,
     'rocket-silo': ROCKET_SILO,
     'mining-drill': ELECTRIC_MINING_FRILL,
@@ -285,8 +281,8 @@ ITEMS = {
         name='iron-ore',
         elementary=True,
         image='https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/iron-ore.png',
-        production_time=0,
-        quantity=0,
+        production_time=1,
+        quantity=1,
         recipe={},
         machineType='mining-drill'
     ),
@@ -423,11 +419,11 @@ ITEMS = {
     ),
     'steel-plate': Item(
         name='steel-plate',
-        elementary=True,
+        elementary=False,
         image='https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/steel-plate.png',
-        production_time=0,
-        quantity=0,
-        recipe={},
+        production_time=16,
+        quantity=1,
+        recipe={'iron-plate': 5},
         machineType='furnace'
     ),
     'stone': Item(
@@ -496,11 +492,11 @@ ITEMS = {
     ),
     'solid-fuel': Item(
         name='solid-fuel',
-        elementary=True,
+        elementary=False,
         image='https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/solid-fuel.png',
         production_time=2,
         quantity=1,
-        recipe={'solid-fuel': 10, 'light-oil': 10},
+        recipe={'light-oil': 10},
         machineType='chemical-plant'
     ),
     'light-oil': Item(
