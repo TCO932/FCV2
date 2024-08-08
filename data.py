@@ -446,8 +446,17 @@ ITEMS = {
     ),
     'sulfur': Item(
         name='sulfur',
-        elementary=True,
+        elementary=False,
         image='https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/sulfur.png',
+        production_time=1,
+        quantity=2,
+        recipe={'water': 30, 'petroleum-gas': 30},
+        machineType='chemical-plant'
+    ),
+    'water': Item(
+        name='water',
+        elementary=True,
+        image='https://raw.githubusercontent.com/TCO932/Factorio-Calculator-App/master/images/water.png',
         production_time=0,
         quantity=0,
         recipe={},
