@@ -21,15 +21,14 @@ class MachineWidget(QtWidgets.QWidget):
         super().__init__()
         self.setupUi()
 
-        for machine in MACHINES.values():
-            self.selectMachine.addItem(machine.getFormattedName(), machine) 
+        # for machine in MACHINES.values():
+        #     self.selectMachine.addItem(machine.getFormattedName(), machine) 
 
         self.selectMachine.currentIndexChanged.connect(self.on_machine_changed)
         
         self.setMachineButton.pressed.connect(self.on_set_machine_button)
 
-        self.modules = MODULES['prod'] | MODULES['speed']
-        for module in self.modules.values():
+        for module in MODULES.values():
             draggableModule = DraggableModule(module)
             self.modulesLayout.addWidget(draggableModule)
 
@@ -42,6 +41,13 @@ class MachineWidget(QtWidgets.QWidget):
 
     def setModel(self, itemMeta: ItemMeta):
         self.effectedMachine = itemMeta.effectedMachine
+
+        self.select_machine(self.effectedMachine)
+
+        self.selectMachine.clear()
+        machines = list(filter(lambda machine: machine.type == itemMeta.machineType, list(MACHINES.values())))
+        for machine in machines:
+            self.selectMachine.addItem(machine.getFormattedName(), machine) 
 
         for i in range(3):
             if itemMeta.no_prod:
@@ -80,6 +86,10 @@ class MachineWidget(QtWidgets.QWidget):
 
     def on_machine_changed(self, index):
         machine: Machine = self.selectMachine.itemData(index)
+
+        if not machine: # TODO danger
+            return
+
         self.beaconsNumberSlider.setRange(0, machine.maxBeacons)
 
         for i, slot in enumerate(self.modulesSlots):
