@@ -3,3 +3,4 @@ cache
 *.ui
 test.py
 *.png
+.vscode

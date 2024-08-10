@@ -1,61 +1,31 @@
+import time
 from typing import Literal, Optional
-from classes import *
-from utility import *
-from data import *
-from consts import *
-from treelib import Node, Tree
+
 from diskcache import Cache
+from treelib import Node, Tree
+
+from classes import *
+from consts import *
+from data import *
 
 cache = Cache('cache')
 
-def calcEffect(effects: dict[int: Module]) -> Effect:
-    resEffect = Effect()
-    for amount, module in effects.items():
-        resEffect.productivity += module.productivity * amount
-        resEffect.speed += module.speed * amount
-    return resEffect
-    
-def setEffects(machine: Machine, effects: dict[Module: int], mode: Literal['FULL', 'ONLY_PROD', 'CUSTOM'] = 'CUSTOM') -> EffectedMachine:
-    """
-    FULL (max amount beacons with 2 tier 3 speed modules, max amount tier 3 prod modules); 
+def time_it(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()  # Время начала
+        result = func(*args, **kwargs)     # Вызов оригинальной функции
+        end_time = time.perf_counter()      # Время окончания
+        duration = end_time - start_time    # Длительность выполнения
+        print(f"Длительность работы функции '{func.__name__}': {duration:.6f} секунд")
+        return result                       # Возврат результата оригинальной функции
+    return wrapper
 
-    ONLY_PROD (max amount tier 3 prod modules);
-
-    CUSTOM (default value, custom beacons and speed modules amount, custom speed module tiers)
-    """
-
-    def FullMode():
-        machine = ASSENBLING_MACHINE_3
-        effects: dict[int: Module] = {
-            machine.slots: PRODUCTIVITY_MODULE_3, 12: SPEED_MODULE_3 #TODO: fix 12 in future
-        }
-        effectedMachine = EffectedMachine(machine)
-        effect = calcEffect(effects)
-        effectedMachine.productivity = effect.productivity
-        effectedMachine.speedInGame = machine.speed * (1 + effect.speed)
-        effectedMachine.speed = machine.speed * (1 + effect.speed) * (1 + effect.productivity) #TODO: check this in game
-
-        return effectedMachine
-
-    def customMode():
-
-        return 
-
-    switcher = {}
-    switcher['FULL'] = FullMode
-    switcher['ONLY_PROD'] = customMode
-    switcher['CUSTOM'] = customMode
-
-    def switch_case(case):
-        return switcher.get(case, lambda: customMode)()
-
-    return switch_case(mode)
-
-@cache.memoize()
+# old
+@cache.memoize(expire=3600)
 def buildCraftTree(itemName: str, amount: float, machine: Machine, craftTree: Tree = None) -> Tree:
     craftTree = craftTree if craftTree is not None else Tree()
     def buildNode(itemName: str, amount: float, machine: Machine, root: Optional[str] = None):
-        item = RECIPES.get(itemName)
+        item = ITEMS.get(itemName)
 
         if (item == None): return
         node = Node(itemName, data=ItemMeta(**vars(item), amount=amount)) #TODO SPEED
@@ -64,8 +34,8 @@ def buildCraftTree(itemName: str, amount: float, machine: Machine, craftTree: Tr
         if (item.elementary): return
 
         for componentName, componentAmount in item.recipe.items():
-            component = RECIPES.get(componentName)
-            prodModifier = machine.productivity
+            component = ITEMS.get(componentName)
+            prodModifier = machine.basicProductivity
             quantityModifier = component.quantity if component.quantity > 0 else 1
             amountModifier = quantityModifier * (1 + prodModifier)
             buildNode(componentName, componentAmount*amount / amountModifier, machine, node.identifier)
@@ -74,53 +44,96 @@ def buildCraftTree(itemName: str, amount: float, machine: Machine, craftTree: Tr
 
     return craftTree
 
+# old
 def calcRes(craftTree: Tree):
     res: dict[str: float] = {}
-
     for node in craftTree.all_nodes():
         itemName = node.tag
         amount = node.data.amount
-
         if itemName in res:
             res[itemName] += amount
         else:
             res[itemName] = amount
-
     return res
 
+# old
 def craftTreeWithAmounts(craftTree: Tree) -> Tree:
     tree = Tree(craftTree.subtree(craftTree.root), deep=True)
-
     for nodeName in craftTree.expand_tree():
         node = tree[nodeName]
         node.tag = node.tag + ' x{}'.format(node.data.amount)
+    return tree
+
+@cache.memoize(expire=3600)
+@time_it
+def buildSpeedTree(itemMeta: ItemMeta) -> ItemTree:
+    machines = list(MACHINES.values())
+    def __buildSpeedNode(itemMeta: ItemMeta, parentId: Optional[str] = None):
+        itemTree.addNode(itemMeta, parentId)
+
+        if (itemMeta.elementary): return
+
+        for componentName, componentAmount in itemMeta.recipe.items():
+            item: Item = ITEMS.get(componentName)
+
+            machine = list(filter(lambda machine: machine.type == item.machineType, machines))[0]
+            effectedMachine = EffectedMachine.fromMachine(machine)
+
+            componentMeta = ItemMeta.fromItem(
+                item, 
+                effectedMachine=effectedMachine, 
+            )
+
+            prodModifier = 0 if itemMeta.no_prod else itemMeta.effectedMachine.productivity
+            quantityModifier = componentMeta.quantity if componentMeta.quantity > 0 else 1 #TODO fix
+            # amountModifier = quantityModifier * (1 + prodModifier)
+            componentMeta.speed = componentAmount*itemMeta.speed/(1 + prodModifier)
+            __buildSpeedNode(componentMeta, itemMeta.id)
+
+    itemTree = ItemTree()
+    __buildSpeedNode(itemMeta)
+
+    return itemTree
+
+
+def recalcSpeedSubtree(itemMeta: ItemMeta, itemTree: ItemTree):
+    def __recalcNode(itemMeta: ItemMeta):
+        children = {}
+        for childId in itemTree.children(itemMeta.id):
+            childMeta = itemTree.getNode(childId)
+            children.update({childMeta.name: childMeta})
+
+        prodModifier = itemMeta.effectedMachine.productivity
+        for componentName, componentAmount in itemMeta.recipe.items():
+            componentMeta = children[componentName]
+            quantityModifier = componentMeta.quantity if componentMeta.quantity > 0 else 1 #TODO fix
+            # amountModifier = quantityModifier * (1 + prodModifier)
+            componentMeta.speed = componentAmount*itemMeta.speed/(1 + prodModifier)
+            __recalcNode(componentMeta)
+
+    __recalcNode(itemMeta)
+
+
+def initSpeedTree(itemMeta: ItemMeta, itemTree: ItemTree | None = None) -> ItemTree:
+    itemTree = itemTree if itemTree else ItemTree()
+
+    itemTree.addRoot(itemMeta)
+
+    return itemTree
+
+
+def buildChildrenSpeed(itemMeta: ItemMeta, tree: ItemTree) -> ItemTree:
+    for childName, amount in itemMeta.recipe.items():
+        childItem: Item = ITEMS[childName]
+        childItemMeta = ItemMeta.fromItem(
+            childItem, 
+            effectedMachine=EffectedMachine.fromMachine(ASSENBLING_MACHINE_3), 
+            speed=itemMeta.speed * amount
+        )
+        tree.addNode(childItemMeta, itemMeta.id)
 
     return tree
 
-def buildSpeedTree(itemName:str, itemPerSecond: float, machine: Machine, craftTree: Tree = Tree()) -> Tree:
-    def buildSpeedNode(itemName: str, itemPerSecond: float, machine: Machine, root: Optional[str] = None):
-        item = RECIPES.get(itemName)
-
-        if (item == None): return
-
-        machinesAmount = None if item.elementary else (itemPerSecond*item.production_time) / (item.quantity*machine.speed)
-        node = Node(itemName, data=ItemMeta(**vars(item),  speed=itemPerSecond, machinesAmount=machinesAmount)) #TODO SPEED
-
-        craftTree.add_node(node, root)
-
-        if (item.elementary): return
-
-        for componentName, componentAmount in item.recipe.items():
-            component = RECIPES.get(componentName)
-            prodModifier = machine.productivity
-            quantityModifier = component.quantity if component.quantity > 0 else 1 #TODO fix
-            amountModifier = quantityModifier * (1 + prodModifier)
-
-            buildSpeedNode(componentName, componentAmount*itemPerSecond/amountModifier, machine, node.identifier)
-
-    buildSpeedNode(itemName, itemPerSecond, machine)
-
-    return craftTree
 
 def craftTreeWithSpeeds(craftTree: Tree) -> Tree:
     tree = Tree(craftTree.subtree(craftTree.root), deep=True)
